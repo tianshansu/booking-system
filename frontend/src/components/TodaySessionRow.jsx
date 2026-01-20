@@ -1,33 +1,30 @@
-export default function TodaySessionRow(){
+export default function TodaySessionRow(data){
     const styles = {
         row: {
             display: "flex",
             alignItems: "center",
-            padding: "12px",
-            borderBottom: "1px solid #ddd"
+            padding: "20px",
+            borderBottom: "1px solid #555"
         },
 
         time: {
-            padding:"12px 12px 12px 12px",
             width: "60px"
         },
 
         info: {
             flex: 1
         }
-    }
+    } // style
     
     return(
-        <div style={{borderBottom: "1px solid #555"}}>
-            <div style={styles.row}>
-                <div style={styles.time}>9:00</div>
-                <div style={styles.info}>
-                    <div style={{fontWeight:600}}>Session Name</div>
-                    <div style={{color:"gray"}}>Patient Name</div>
-                    <div>Status</div>
-                </div>
+        <div style={styles.row}>
+            <div style={styles.time}>{data.time}</div>
+            <div style={styles.info}>
+                <div style={{fontWeight:600}}>{data.title}</div>
+                <div style={{color:"gray"}}>{data.patientName}</div>
+                <div>{data.status}</div>
             </div>
         </div>
-        
+        // details in render
     )
 }

@@ -1,12 +1,18 @@
-import UpcomingSessionRow from "./UpcomingSessionRow";
-
-export default function UpcomingSessionList(){
+export default function UpcomingSessionList({sessions, RowComponent}){
     return(
         <div>
-            <UpcomingSessionRow></UpcomingSessionRow>
-            <UpcomingSessionRow></UpcomingSessionRow>
-            <UpcomingSessionRow></UpcomingSessionRow>
-            <UpcomingSessionRow></UpcomingSessionRow>
+            {
+                sessions.map(item=>(
+                    <RowComponent
+                        key={item.id}
+                        date={item.date}
+                        time={item.time}
+                        title={item.title}
+                        patientName={item.patientName}>
+                    </RowComponent>
+                ))
+                // map items to render
+            }
         </div>
     )
 }

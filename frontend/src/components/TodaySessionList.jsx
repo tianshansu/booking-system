@@ -1,12 +1,15 @@
-import TodaySessionRow from "./TodaySessionRow";
-
-export default function TodaySessionList(){
+export default function TodaySessionList({sessions, RowComponent}){
     return(
         <div>
-            <TodaySessionRow></TodaySessionRow>
-            <TodaySessionRow></TodaySessionRow>
-            <TodaySessionRow></TodaySessionRow>
-            <TodaySessionRow></TodaySessionRow>
+            {sessions.map(item => (
+                <RowComponent
+                    key={item.id}
+                    time={item.time}
+                    title={item.title}
+                    patientName={item.patientName}
+                    status={item.status}
+                />
+            ))}
         </div>
     )
 }
