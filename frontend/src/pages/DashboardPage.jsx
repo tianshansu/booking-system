@@ -1,5 +1,3 @@
-import Sidebar from "../components/layout/Sidebar";
-import HeadBar from "../components/layout/HeaderBar";
 import "./Dashboard.css"
 import Card from "../components/Card";
 import ListPanel from "../components/ListPanel";
@@ -7,6 +5,8 @@ import TodaySessionList from "../components/TodaySessionList";
 import UpcomingSessionList from "../components/UpcomingSessionList";
 import TodaySessionRow from "../components/TodaySessionRow";
 import UpcomingSessionRow from "../components/UpcomingSessionRow";
+import RecentActivityList from "../components/RecentActivityList";
+import RecentActivityListRow from "../components/RecentActivityListRow";
 
 export default function DashboardPage(){
     const TODAY = "2025-01-15" //set a today's date
@@ -21,6 +21,24 @@ export default function DashboardPage(){
     const todaySessions=sessions.filter(s => s.date === TODAY) //filter out today's sessions
 
     const upcomingSessions = sessions.filter(s => s.date > TODAY && s.status !== "Completed") //filter upcoming sessions
+
+    const recentActivities = [
+    {
+        id: 1,
+        message: "Session completed with Michael Chen",
+        time: "2 hours ago"
+    },
+    {
+        id: 2,
+        message: "New session scheduled for Amanda Foster",
+        time: "5 hours ago"
+    },
+    {
+        id: 3,
+        message: "New person added - Amanda Foster",
+        time: "6 hours ago"
+    }
+    ] // mock data for recent actiivity
     
     return(
         <div style={{display:"grid"}}>
@@ -39,6 +57,7 @@ export default function DashboardPage(){
                 display:"grid",
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 gap: 20,
+                marginBottom:30,
             }}>
                 <ListPanel title="Today's Sessions" date="Wednesday, January 15, 2025">
                     <TodaySessionList sessions={todaySessions} RowComponent={TodaySessionRow}></TodaySessionList>
@@ -49,7 +68,11 @@ export default function DashboardPage(){
                     {/* send corresponding session data and the RowComponent to list */}
                 </ListPanel>
             </div>
-            <div>recent activity</div>
+            <div>
+                <ListPanel title="Recent Activity" date="Latest updates and changes">
+                    <RecentActivityList activities={recentActivities} RowComponent={RecentActivityListRow}></RecentActivityList>
+                </ListPanel>
+            </div>
         </div>    
     )
 }

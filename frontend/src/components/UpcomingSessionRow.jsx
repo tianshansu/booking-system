@@ -1,25 +1,45 @@
-export default function UpcomingSessionRow(session){
+export default function UpcomingSessionRow({date, time, title, patientName}){
     const styles={
         row:{
-            display:"grid",
+            display:"flex",
             padding:"20px",
-            borderBottom: "1px solid #555"
+            borderBottom: "1px solid #555",
+            justifyContent:"space-between"
+
         },
         dateTime:{
             display:"flex",
             gap:10
+        },
+        content:{
+            display:"grid",
+        },
+        icon:{
+            height:20
+        },
+        button:{
+            background: "none",
+            border: "none",
         }
+    }
+
+    const viewMoreButton = ()=>{
+        alert("Upcoming Sessions more button clicked!" )
     }
 
     return(
         <div style={styles.row}>
-            <div style={styles.dateTime}>
-                <div>{session.date}</div>
-                <div style={{color:"gray"}}>{session.time}</div>
+            <div style={styles.content}>
+                <div style={styles.dateTime}>
+                    <div>{date}</div>
+                    <div style={{color:"gray"}}>{time}</div>
+                </div>
+                <div style={{fontWeight:600}}>{title}</div>
+                <div style={{color:"gray"}}>{patientName}</div>
             </div>
-            <div style={{fontWeight:600}}>{session.title}</div>
-            <div style={{color:"gray"}}>{session.patientName}</div>
-            
+            <button type="button" style={styles.button} onClick={viewMoreButton} aria-label="View more options">
+                <img src="/icons/more.svg" style={styles.icon} alt="more info"></img>
+            </button>
         </div>
     )
 }
