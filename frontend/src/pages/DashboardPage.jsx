@@ -1,12 +1,12 @@
 import "./Dashboard.css"
-import Card from "../components/Card";
-import ListPanel from "../components/ListPanel";
-import TodaySessionList from "../components/TodaySessionList";
-import UpcomingSessionList from "../components/UpcomingSessionList";
-import TodaySessionRow from "../components/TodaySessionRow";
-import UpcomingSessionRow from "../components/UpcomingSessionRow";
-import RecentActivityList from "../components/RecentActivityList";
-import RecentActivityListRow from "../components/RecentActivityListRow";
+import Card from "../components/common/Card";
+import ListPanel from "../components/common/ListPanel";
+import TodaySessionList from "../components/dashboard/TodaySessionList";
+import UpcomingSessionList from "../components/dashboard/UpcomingSessionList";
+import TodaySessionRow from "../components/dashboard/TodaySessionRow";
+import UpcomingSessionRow from "../components/dashboard/UpcomingSessionRow";
+import RecentActivityList from "../components/dashboard/RecentActivityList";
+import RecentActivityListRow from "../components/dashboard/RecentActivityListRow";
 
 export default function DashboardPage() {
     const TODAY = "2025-01-15" //set a today's date

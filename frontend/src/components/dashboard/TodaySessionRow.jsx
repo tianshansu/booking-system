@@ -4,7 +4,7 @@ export default function TodaySessionRow({time, info, title, patientName, status}
             display: "flex",
             alignItems: "center",
             padding: "20px",
-            borderBottom: "1px solid #555",
+            borderBottom: "1px solid #E5E7EB",
             justifyContent:"space-between"
         },
         time: {

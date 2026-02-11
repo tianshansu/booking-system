@@ -3,7 +3,7 @@ export default function UpcomingSessionRow({date, time, title, patientName}){
         row:{
             display:"flex",
             padding:"20px",
-            borderBottom: "1px solid #555",
+            borderBottom: "1px solid #E5E7EB",
             justifyContent:"space-between"
 
         },
