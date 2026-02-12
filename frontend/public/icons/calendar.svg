@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" id="calendar">
+  <rect width="40" height="39" x="4" y="6" fill="#eff3f9" rx="4" ry="4"></rect>
+  <path fill="#cfe0f3" d="m43,42H11c-2.209,0-4-1.791-4-4V7c0-.308.042-.604.108-.892-1.778.406-3.108,1.991-3.108,3.892v31c0,2.209,1.791,4,4,4h32c1.901,0,3.486-1.33,3.892-3.108-.288.066-.584.108-.892.108Z"></path>
+  <path fill="#0ca0f2" d="m8,6h32c2.209,0,4,1.791,4,4v5H4v-5c0-2.209,1.791-4,4-4Z"></path>
+  <path fill="#0588e2" d="m7,7c0-.308.042-.604.108-.892-1.778.406-3.108,1.991-3.108,3.892v5h3V7Z"></path>
+  <rect width="4" height="6" x="10" y="3" fill="#0d3b8d" rx="2" ry="2"></rect>
+  <rect width="4" height="6" x="34" y="3" fill="#0d3b8d" rx="2" ry="2"></rect>
+  <rect width="4" height="6" x="22" y="3" fill="#0d3b8d" rx="2" ry="2"></rect>
+  <rect width="6" height="6" x="10" y="20" fill="#aecee8" rx="2" ry="2"></rect>
+  <rect width="6" height="6" x="21" y="20" fill="#aecee8" rx="2" ry="2"></rect>
+  <rect width="6" height="6" x="32" y="20" fill="#aecee8" rx="2" ry="2"></rect>
+  <rect width="6" height="6" x="10" y="32" fill="#aecee8" rx="2" ry="2"></rect>
+  <rect width="6" height="6" x="21" y="32" fill="#aecee8" rx="2" ry="2"></rect>
+  <rect width="6" height="6" x="32" y="32" fill="#aecee8" rx="2" ry="2"></rect>
+</svg>

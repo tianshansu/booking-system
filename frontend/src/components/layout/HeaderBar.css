@@ -1,0 +1,24 @@
+.header{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+}
+
+.header-content{
+    padding:12px 16px;
+}
+
+.header-content-title{
+    font-weight:800;
+    font-size:20px;
+}
+
+.header-content-text{
+    font-size:14px;
+}
+
+.header-search{
+    width: 260px;
+    height: 50px;
+    margin-top: 5px
+}
