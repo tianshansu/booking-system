@@ -9,7 +9,7 @@ const TITLE_MAP = {
 
 const SUBTITLE_MAP = {
     "/": "Welcome back!",
-    "/people": "Manage people",
+    "/people": "Manage clients and records",
     "/sessions": "Manage sessions",
 };
 

@@ -1,7 +1,7 @@
 import Sidebar from "./Sidebar";
 import HeadBar from "./HeaderBar";
 import { Outlet } from "react-router-dom";
-import "../../pages/Dashboard.css";
+import "../../pages/Dashboard/Dashboard.css";
 
 export default function AppLayout(){
     return(

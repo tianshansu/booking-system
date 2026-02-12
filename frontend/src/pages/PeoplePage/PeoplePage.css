@@ -1,0 +1,29 @@
+.people{
+   display: grid;
+   min-height: 100vh;
+   align-content: start; 
+   gap: 20px;
+}
+
+.people-header{
+    display: flex;
+    justify-content: space-between;
+    width:100%;
+}
+
+.people-header-buttons{
+    display: flex;
+    gap: 10px;
+}
+
+.people-header-button-img{
+    width: 20px;
+}
+
+.people-header-button{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 14px;
+    height: 40px;
+}

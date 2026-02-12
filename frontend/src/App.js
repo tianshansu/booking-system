@@ -1,8 +1,8 @@
 // import logo from './logo.svg';
 import './App.css';
-import DashboardPage from './pages/DashboardPage';
-import PeoplePage from './pages/PeoplePage';
-import SessionsPage from './pages/SessionsPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
+import PeoplePage from './pages/PeoplePage/PeoplePage';
+import SessionsPage from './pages/SessionPage/SessionsPage';
 import AppLayout from "./components/layout/AppLayout";
 import {Routes, Route} from 'react-router-dom';
 
