@@ -1,0 +1,11 @@
+.people-table-table{
+    width: 100%;
+    background-color: #F9FAFB;
+    border: 1px solid #E5E7EB;
+}
+
+.people-table-table-header{
+    font-size: 12px;
+    padding: 10px;
+    text-align: center;
+}
