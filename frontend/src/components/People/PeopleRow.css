@@ -6,3 +6,16 @@
 .people-row{
     border: 1px solid #E5E7EB;
 }
+
+.people-row-actions{
+    display: grid
+}
+
+.people-row-action-button{
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 520;
+}

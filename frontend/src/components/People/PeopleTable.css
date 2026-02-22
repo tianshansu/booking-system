@@ -9,3 +9,28 @@
     padding: 10px;
     text-align: center;
 }
+
+.people-table-table-footer{
+    font-size: 14px;
+    padding: 20px;
+    background-color: white;
+}
+
+.people-table-table-footer-button{
+    background: none;
+    border: 1px solid #E5E7EB;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: 520;
+}
+
+.people-table-table-footer-content{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.people-table-table-footer-buttons{
+    display: flex;
+    gap: 10px;
+}
