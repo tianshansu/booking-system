@@ -1,5 +1,68 @@
-export default function PeopleTable(){
-    return(
-        <div>people table</div>
-    )
+import "./PeopleTable.css";
+import PeopleRow from "./PeopleRow";
+import { people } from "../../data/mockPeople";
+
+export default function PeopleTable() {
+  return (
+    <div className="people-table">
+      <table className="people-table-table">
+        <thead>
+          <tr>
+            <th scope="col" className="people-table-table-header">
+              <input type="checkbox"></input>
+            </th>
+            <th scope="col" className="people-table-table-header">
+              NAME
+            </th>
+            <th scope="col" className="people-table-table-header">
+              EMAIL
+            </th>
+            <th scope="col" className="people-table-table-header">
+              PHONE
+            </th>
+            <th scope="col" className="people-table-table-header">
+              STATUS
+            </th>
+            <th scope="col" className="people-table-table-header">
+              LAST SESSION
+            </th>
+            <th scope="col" className="people-table-table-header">
+              NOTES
+            </th>
+            <th scope="col" className="people-table-table-header">
+              ACTIONS
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {people.map((person) => (
+            <PeopleRow key={person.id} person={person} />
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={8} className="people-table-table-footer">
+              <div className="people-table-table-footer-content">
+                Showing 1-5 of 42 people
+                <div className="people-table-table-footer-buttons">
+                  <button
+                    type="button"
+                    className="people-table-table-footer-button"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="people-table-table-footer-button"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
 }
