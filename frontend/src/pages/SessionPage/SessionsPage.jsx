@@ -1,5 +1,6 @@
 import "./SessionsPage.css";
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
+import SessionsTable from "../../components/sessions/SessionsTable";
 
 export default function SessionsPage() {
   return (
@@ -39,6 +40,7 @@ export default function SessionsPage() {
           </div>
         </div>
         <SessionsFilterBar />
+        <SessionsTable />
       </div>
     </>
   );
