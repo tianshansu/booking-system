@@ -1,8 +1,7 @@
 import "./PeopleTable.css";
 import PeopleRow from "./PeopleRow";
-import { people } from "../../data/mockPeople";
 
-export default function PeopleTable() {
+export default function PeopleTable({ people }) {
   return (
     <div className="people-table">
       <table className="people-table-table">
