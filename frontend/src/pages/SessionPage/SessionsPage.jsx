@@ -1,7 +1,47 @@
-export default function SessionsPage(){
-    return(
-        <>
-            <p>This is sessions page</p>
-        </>
-    )
+import "./SessionsPage.css";
+import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
+import SessionsTable from "../../components/sessions/SessionsTable";
+
+export default function SessionsPage() {
+  return (
+    <>
+      <div className="sessions">
+        <div className="sessions-header">
+          <div>View and manage all sessions in the system.</div>
+          <div className="sessions-header-buttons">
+            <button className="sessions-header-button" type="button">
+              <img
+                className="sessions-header-button-img"
+                src="/icons/import.svg"
+                alt="import icon"
+              ></img>
+              <div className="sessions-header-button-text">Export</div>
+            </button>
+
+            <div className="sessions-header-buttons">
+              <button
+                className="sessions-header-button"
+                style={{ backgroundColor: "#4338CA", border: "none" }}
+                type="button"
+              >
+                <img
+                  className="sessions-header-button-img"
+                  src="/icons/add.svg"
+                  alt="add session"
+                ></img>
+                <div
+                  className="sessions-header-button-text"
+                  style={{ color: "white" }}
+                >
+                  Add session
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <SessionsFilterBar />
+        <SessionsTable />
+      </div>
+    </>
+  );
 }
