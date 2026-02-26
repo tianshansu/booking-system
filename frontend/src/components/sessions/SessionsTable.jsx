@@ -44,7 +44,7 @@ export default function SessionsTable() {
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={8} className="sessions-table-table-footer">
+            <td colSpan={9} className="sessions-table-table-footer">
               <div className="sessions-table-table-footer-content">
                 Showing 1-5 of 42 sessions
                 <div className="sessions-table-table-footer-buttons">
