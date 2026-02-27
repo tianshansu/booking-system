@@ -1,5 +1,5 @@
 import "./PeoplePage.css";
-import PeopleTable from "../../components/People/PeopleTable";
+import PeopleTable from "../../components/people/PeopleTable";
 import { useEffect, useState } from "react";
 
 export default function PeoplePage() {

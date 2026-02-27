@@ -1,8 +1,8 @@
 import "./SessionsTable.css";
 import SessionsRow from "./SessionsRow";
-import { sessions } from "../../data/mockSessions";
+// import { sessions } from "../../data/mockSessions";
 
-export default function SessionsTable() {
+export default function SessionsTable({ sessions }) {
   return (
     <div className="sessions-table">
       <table className="sessions-table-table">
