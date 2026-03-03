@@ -110,6 +110,7 @@ Response 200:
     "duration": "60m"
   }
 ]
+```
 
 Response fields:
 
@@ -132,4 +133,7 @@ duration: string | null // e.g. "30m"
 Errors:
 
 500: Database error
+
+```
+
 ```
