@@ -1,109 +1,51 @@
 const express = require("express");
 const router = express.Router();
+const { pool } = require("../db");
 
-router.get("/", (req, res) => {
-  res.json([
-    {
-      id: 1,
-      date: "2025-01-15",
-      time: "09:00",
-      title: "Initial Consultation",
-      patientName: "Michael Chen",
-      status: "Completed",
-      duration: "60m",
-      staff: "Jacqueline White",
-    },
-    {
-      id: 2,
-      date: "2025-01-15",
-      time: "10:30",
-      title: "Follow-up Session",
-      patientName: "Emma Rodriguez",
-      status: "Scheduled",
-      duration: "15m",
-      staff: "Susan White",
-    },
-    {
-      id: 3,
-      date: "2025-01-15",
-      time: "11:45",
-      title: "Review Meeting",
-      patientName: "Sarah Thompson",
-      status: "Scheduled",
-      duration: "45m",
-      staff: "John Doe",
-    },
-    {
-      id: 4,
-      date: "2025-01-15",
-      time: "14:00",
-      title: "Training Session",
-      patientName: "David Kim",
-      status: "Scheduled",
-      duration: "30m",
-      staff: "Terry Chen",
-    },
-    {
-      id: 5,
-      date: "2025-01-15",
-      time: "16:00",
-      title: "Progress Check",
-      patientName: "Amanda Foster",
-      status: "Scheduled",
-      duration: "45m",
-      staff: "Lisa O'Connor",
-    },
-    {
-      id: 6,
-      date: "2025-01-18",
-      time: "10:00",
-      title: "Assessment Session",
-      patientName: "Jennifer Lee",
-      status: "Scheduled",
-      duration: "15m",
-      staff: "Jennifer Lee",
-    },
-    {
-      id: 7,
-      date: "2025-01-19",
-      time: "13:30",
-      title: "Consultation",
-      patientName: "Robert Martinez",
-      status: "Scheduled",
-      duration: "60m",
-      staff: "Robert Martinez",
-    },
-    {
-      id: 8,
-      date: "2025-01-20",
-      time: "09:00",
-      title: "Initial Consultation",
-      patientName: "Amanda Foster",
-      status: "Scheduled",
-      duration: "60m",
-      staff: "Amanda Foster",
-    },
-    {
-      id: 9,
-      date: "2025-01-21",
-      time: "15:00",
-      title: "Training Workshop",
-      patientName: "Group Session (6 people)",
-      status: "Scheduled",
-      duration: "60m",
-      staff: "Robert Martinez",
-    },
-    {
-      id: 10,
-      date: "2025-01-22",
-      time: "11:00",
-      title: "Follow-up Session",
-      patientName: "Daniel Wu",
-      status: "Scheduled",
-      duration: "60m",
-      staff: "Daniel Wu",
-    },
-  ]);
+router.get("/", async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        s.id,
+        s.name,
+        s.status,
+        s.start_at,
+        s.end_at,
+        patient.id   AS patient_id,
+        patient.name AS patient_name,
+        staff.id     AS staff_id,
+        staff.name   AS staff_name
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
+      ORDER BY s.start_at DESC;
+    `;
+    const { rows } = await pool.query(sql);
+
+    // Convert DB fields -> frontend-friendly fields
+    const data = rows.map((r) => ({
+      id: r.id,
+      title: r.name,
+      patientName: r.patient_name,
+      staff: r.staff_name,
+      status:
+        r.status === 0
+          ? "Scheduled"
+          : r.status === 1
+            ? "Completed"
+            : "Cancelled",
+      date: r.start_at.toISOString().slice(0, 10),
+      time: r.start_at.toISOString().slice(11, 16),
+      duration: r.end_at
+        ? `${Math.round((r.end_at - r.start_at) / 60000)}m`
+        : null,
+    }));
+
+    res.json(data);
+  } catch (err) {
+    console.error("GET /sessions error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;

@@ -36,7 +36,7 @@ export default function DashboardPage() {
       .catch((e) => console.error("fetch failed:", e));
   }, []);
 
-  const TODAY = "2025-01-15";
+  const TODAY = new Date().toLocaleDateString("en-CA"); // 2026-03-03
   const todaySessions = sessions.filter((s) => s.date === TODAY); //filter out today's sessions
   const upcomingSessions = sessions.filter(
     (s) => s.date > TODAY && s.status !== "Completed",

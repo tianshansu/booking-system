@@ -1,0 +1,135 @@
+# API Documentation
+
+Base URL (Local): http://localhost:4000/api
+
+Content-Type:
+
+- Request/Response: `application/json`
+
+## Conventions
+
+### Status mapping
+
+- `people.status`: `0=active`, `1=inactive`
+- `sessions.status`: `0=scheduled`, `1=completed`, `2=cancelled`
+
+### Computed fields
+
+- `lastSession` is derived from `sessions` (MAX(start_at)) and is NOT stored in `people`.
+
+---
+
+# People
+
+## GET /api/people
+
+Purpose:
+
+- Get a list of patients (role=0) with their last session date.
+
+Auth:
+
+- None
+
+Query params:
+
+- None (for now)
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "1234567890",
+    "status": "Active",
+    "lastSession": "2024-01-15",
+    "notes": "not come for sessions for a long time"
+  }
+]
+```
+
+Response fields:
+
+id: number
+
+name: string
+
+email: string | null
+
+phone: string | null
+
+status: "Active" | "Inactive"
+
+lastSession: "YYYY-MM-DD" | null
+
+notes: string | null
+
+Errors:
+
+500: Database error
+
+# Sessions
+
+## GET /api/sessions
+
+Purpose:
+
+- Get a list of sessions with patient/staff names (joined from `people`).
+
+Auth:
+
+- None
+
+Query params:
+
+- None (for now)
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Regular Meet",
+    "patientName": "John Doe",
+    "staff": "Dr Smith",
+    "status": "Scheduled",
+    "date": "2024-01-15",
+    "time": "02:00",
+    "duration": "60m"
+  }
+]
+
+Response fields:
+
+id: number
+
+title: string
+
+patientName: string
+
+staff: string
+
+status: "Scheduled" | "Completed" | "Cancelled"
+
+date: "YYYY-MM-DD"
+
+time: "HH:mm"
+
+duration: string | null // e.g. "30m"
+
+Errors:
+
+500: Database error
+```
