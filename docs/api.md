@@ -134,6 +134,51 @@ Errors:
 
 500: Database error
 
+# Dashboard
+
+## GET /api/dashboard/summary
+
+Purpose:
+
+- Get dashboard summary counts for the four top cards:
+  - Today's scheduled sessions
+  - Upcoming scheduled sessions (next 7 days)
+  - Completed sessions (this month)
+  - Active people
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+{
+  "today_count": 3,
+  "upcoming_count": 7,
+  "completed_count": 2,
+  "active_people": 3
+}
 ```
 
-```
+Response fields:
+
+today_count: number
+
+upcoming_count: number
+
+completed_count: number
+
+active_people: number
+
+Errors:
+
+500: Database error

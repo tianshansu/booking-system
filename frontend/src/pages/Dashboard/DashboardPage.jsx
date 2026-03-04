@@ -12,6 +12,12 @@ import { useEffect, useState } from "react";
 export default function DashboardPage() {
   const [sessions, setSessions] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
+  const [summary, setSummary] = useState({
+    todaySessions: 0,
+    upcoming: 0,
+    completed: 0,
+    activePeople: 0,
+  });
 
   useEffect(() => {
     fetch("/api/sessions")
@@ -23,8 +29,7 @@ export default function DashboardPage() {
         setSessions(data);
       })
       .catch((e) => console.error("fetch failed:", e));
-  }, []);
-  useEffect(() => {
+
     fetch("/api/dashboard")
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -32,6 +37,16 @@ export default function DashboardPage() {
       })
       .then((data) => {
         setRecentActivities(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+
+    fetch("/api/dashboard/summary")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setSummary(data);
       })
       .catch((e) => console.error("fetch failed:", e));
   }, []);
@@ -56,14 +71,22 @@ export default function DashboardPage() {
       >
         <Card
           title="Today's Sessions"
-          count="8"
+          count={summary.today_count ?? 0}
           comment="+2 from yesterday"
         ></Card>
-        <Card title="Upcoming" count="24" comment="Next 7 days"></Card>
-        <Card title="Completed" count="156" comment="This month"></Card>
+        <Card
+          title="Upcoming"
+          count={summary.upcoming_count ?? 0}
+          comment="Next 7 days"
+        ></Card>
+        <Card
+          title="Completed"
+          count={summary.completed_count ?? 0}
+          comment="This month"
+        ></Card>
         <Card
           title="Active People"
-          count="42"
+          count={summary.active_people ?? 0}
           comment="Total registered"
         ></Card>
       </div>
