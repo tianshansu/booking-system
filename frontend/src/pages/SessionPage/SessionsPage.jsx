@@ -1,8 +1,22 @@
 import "./SessionsPage.css";
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
+import { useEffect, useState } from "react";
 
 export default function SessionsPage() {
+  const [sessions, setSessions] = useState([]);
+  useEffect(() => {
+    fetch("/api/sessions")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setSessions(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+  }, []);
+
   return (
     <>
       <div className="sessions">
@@ -40,7 +54,7 @@ export default function SessionsPage() {
           </div>
         </div>
         <SessionsFilterBar />
-        <SessionsTable />
+        <SessionsTable sessions={sessions} />
       </div>
     </>
   );
