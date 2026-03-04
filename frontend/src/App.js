@@ -1,25 +1,24 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
+import DashboardPage from './pages/Dashboard/DashboardPage';
+import PeoplePage from './pages/PeoplePage/PeoplePage';
+import SessionsPage from './pages/SessionPage/SessionsPage';
+import AppLayout from "./components/layout/AppLayout";
+import {Routes, Route} from 'react-router-dom';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <Routes>
+      <Route path="/" element={<AppLayout />}> 
+      {/* always render the layout first */}
+        <Route index element={<DashboardPage />} />
+        {/* path= "/" */}
+        <Route path="people" element={<PeoplePage />} />
+        <Route path="sessions" element={<SessionsPage />} />
+      </Route>
+    </Routes>
+    
+  )
 }
 
 export default App;

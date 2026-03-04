@@ -1,0 +1,36 @@
+.sessions-filter-bar-item{
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    border: 1px solid #E5E7EB;
+}
+
+.sessions-filter-bar-item-icon{
+    width: 20px;
+}
+
+.sessions-filter-bar-item-left{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+}
+
+.sessions-filter-bar-item-right{
+    padding: 10px;
+    align-items: center;
+}
+
+.sessions-filter-bar-item-button{
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: gray;
+    padding: 10px;
+}
+
+.sessions-filter-bar-item-select{
+    padding: 10px;
+    background-color: #F9FAFB;
+    border: 1px solid #E5E7EB;
+}
