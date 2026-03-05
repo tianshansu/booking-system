@@ -15,6 +15,8 @@ router.get("/", async (req, res) => {
         patient.name AS patient_name,
         staff.id     AS staff_id,
         staff.name   AS staff_name
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'YYYY-MM-DD') AS session_date,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'HH24:MI')    AS session_time,
       FROM sessions s
       JOIN people patient ON s.patient_id = patient.id
       JOIN people staff   ON s.staff_id   = staff.id
@@ -34,8 +36,8 @@ router.get("/", async (req, res) => {
           : r.status === 1
             ? "Completed"
             : "Cancelled",
-      date: r.start_at.toISOString().slice(0, 10),
-      time: r.start_at.toISOString().slice(11, 16),
+      date: r.session_date,
+      time: r.session_time,
       duration: r.end_at
         ? `${Math.round((r.end_at - r.start_at) / 60000)}m`
         : null,

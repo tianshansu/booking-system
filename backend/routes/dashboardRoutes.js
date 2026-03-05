@@ -28,7 +28,7 @@ router.get("/summary", async (req, res) => {
       SELECT
         COUNT(*) FILTER (
           WHERE s.start_at::date = CURRENT_DATE
-            AND s.status = 0
+            AND s.status IN (0,1)
         ) AS today_count,
 
         COUNT(*) FILTER (
