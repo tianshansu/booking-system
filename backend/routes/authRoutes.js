@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 router.post("/login", async (req, res) => {
   try {
@@ -40,8 +41,17 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Minimal success response (token can be added later)
-    return res.json({ ok: true, user: { id: user.id, email: user.email } });
+    // Generate token & return to frontend
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" },
+    );
+    return res.json({
+      ok: true,
+      token,
+      user: { id: user.id, email: user.email },
+    });
   } catch (err) {
     console.error("POST /auth/login error:", err);
     res.status(500).json({ error: "Internal server error" });

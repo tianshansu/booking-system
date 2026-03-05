@@ -1,13 +1,15 @@
 import "./PeoplePage.css";
 import PeopleTable from "../../components/people/PeopleTable";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
 
   useEffect(() => {
-    fetch("/api/people")
+    apiFetch("/api/people")
       .then((r) => {
+        if (!r.ok) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })

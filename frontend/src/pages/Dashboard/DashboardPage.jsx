@@ -8,6 +8,7 @@ import UpcomingSessionRow from "../../components/dashboard/UpcomingSessionRow";
 import RecentActivityList from "../../components/dashboard/RecentActivityList";
 import RecentActivityListRow from "../../components/dashboard/RecentActivityListRow";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
 export default function DashboardPage() {
   const [sessions, setSessions] = useState([]);
@@ -20,8 +21,9 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    fetch("/api/sessions")
+    apiFetch("/api/sessions")
       .then((r) => {
+        if (!r) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
@@ -30,8 +32,9 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("fetch failed:", e));
 
-    fetch("/api/dashboard")
+    apiFetch("/api/dashboard")
       .then((r) => {
+        if (!r) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
@@ -40,8 +43,9 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("fetch failed:", e));
 
-    fetch("/api/dashboard/summary")
+    apiFetch("/api/dashboard/summary")
       .then((r) => {
+        if (!r) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
