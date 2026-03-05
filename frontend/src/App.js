@@ -1,24 +1,25 @@
 // import logo from './logo.svg';
-import './App.css';
-import DashboardPage from './pages/Dashboard/DashboardPage';
-import PeoplePage from './pages/PeoplePage/PeoplePage';
-import SessionsPage from './pages/SessionPage/SessionsPage';
+import "./App.css";
+import DashboardPage from "./pages/Dashboard/DashboardPage";
+import PeoplePage from "./pages/PeoplePage/PeoplePage";
+import SessionsPage from "./pages/SessionPage/SessionsPage";
 import AppLayout from "./components/layout/AppLayout";
-import {Routes, Route} from 'react-router-dom';
+import LoginPage from "./pages/LoginPage/LoginPage";
+import { Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<AppLayout />}> 
-      {/* always render the layout first */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<AppLayout />}>
+        {/* always render the layout first */}
         <Route index element={<DashboardPage />} />
         {/* path= "/" */}
         <Route path="people" element={<PeoplePage />} />
         <Route path="sessions" element={<SessionsPage />} />
       </Route>
     </Routes>
-    
-  )
+  );
 }
 
 export default App;

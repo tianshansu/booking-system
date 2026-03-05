@@ -2,12 +2,14 @@ import "./SessionsPage.css";
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../api";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
   useEffect(() => {
-    fetch("/api/sessions")
+    apiFetch("/api/sessions")
       .then((r) => {
+        if (!r.ok) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
