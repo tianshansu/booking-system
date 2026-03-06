@@ -44,4 +44,28 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/add-patient", async (req, res) => {
+  try {
+    // get values from req
+    const { name, email, phone, notes } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    // add this people in db
+    const sql = `
+      INSERT INTO people (role, name, email, phone, status, notes)
+      VALUES (0, $1, $2, $3, 0, $4)
+      RETURNING *;
+    `;
+    const result = await pool.query(sql, [name, email, phone, notes]);
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("POST /people/add-patient error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
