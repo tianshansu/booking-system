@@ -19,6 +19,53 @@ Content-Type:
 
 ---
 
+# Auth
+
+## POST /api/auth/login
+
+Purpose:
+
+- User login. Returns a JWT token for accessing protected APIs.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "plaintext password"
+}
+```
+
+Response fields:
+
+ok: boolean
+token: string (JWT)
+user.id: number
+user.email: string
+
+Errors:
+
+400: email/password required
+401: Invalid credentials
+403: Account disabled
+500: Internal server error
+
+Notes:
+
+Store token on the frontend (e.g., localStorage).
+
+For protected APIs, include this header in every request:
+
+Authorization: Bearer <token>
+
 # People
 
 ## GET /api/people
