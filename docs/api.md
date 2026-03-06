@@ -75,6 +75,77 @@ Errors:
 
 500: Database error
 
+## POST /api/people/add-patient
+
+Purpose:
+
+- Create a new patient in `people` with:
+  - `role=0`
+  - `status=0` (active)
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+```json
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "1234567890",
+  "notes": "new patient"
+}
+```
+
+Request body fields:
+
+name: string (required)
+
+email: string | null
+
+phone: string | null
+
+notes: string | null
+
+Response 201:
+
+{
+"id": 1,
+"role": 0,
+"name": "John Doe",
+"email": "john.doe@example.com",
+"phone": "1234567890",
+"status": 0,
+"notes": "new patient"
+}
+
+Response fields:
+
+id: number
+
+role: number
+
+name: string
+
+email: string | null
+
+phone: string | null
+
+status: number
+
+notes: string | null
+
+Errors:
+
+400: Name is required
+
+500: Internal server error
+
 # Sessions
 
 ## GET /api/sessions
