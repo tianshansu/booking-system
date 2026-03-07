@@ -146,6 +146,37 @@ Errors:
 
 500: Internal server error
 
+## DELETE /api/people/:id
+
+Purpose:
+
+- Delete a person by `id`.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Path params:
+
+- `id`: person id
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+{
+  "message": "Person deleted successfully",
+  "deletedId": 1
+}
+```
+
 # Sessions
 
 ## GET /api/sessions

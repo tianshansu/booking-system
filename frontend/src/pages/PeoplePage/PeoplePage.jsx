@@ -66,6 +66,29 @@ export default function PeoplePage() {
 
     //show msg
   };
+
+  const handleDelete = async (personId) => {
+    // send req & get res
+    const response = await apiFetch(`/api/people/${personId}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    // set msg
+    if (response.ok) {
+      setPeople((prev) => prev.filter((person) => person.id !== personId));
+      setMsg("Patient deleted successfully");
+    } else {
+      setMsg("Failed to delete patient");
+    }
+    setShowMsg(true);
+
+    setTimeout(() => {
+      setShowMsg(false);
+    }, 1000);
+  };
+
   return (
     <div className="people">
       <div className="people-header">
@@ -158,7 +181,11 @@ export default function PeoplePage() {
         </div>
       </div>
 
-      <PeopleTable className="people-table" people={people}></PeopleTable>
+      <PeopleTable
+        className="people-table"
+        people={people}
+        onDelete={handleDelete}
+      ></PeopleTable>
     </div>
   );
 }

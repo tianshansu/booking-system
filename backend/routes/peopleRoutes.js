@@ -68,4 +68,37 @@ router.post("/add-patient", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    // get person's id
+    const personId = req.params.id;
+
+    if (Number.isNaN(personId)) {
+      return res.status(400).json({ error: "Invalid person id" });
+    }
+
+    const sql = `
+      DELETE
+      FROM people p
+      where p.id = $1
+      RETURNING id
+    `;
+
+    const { rows } = await pool.query(sql, [personId]);
+
+    // if no data returned
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Person not found" });
+    }
+
+    res.status(200).json({
+      message: "Person deleted successfully",
+      deletedId: rows[0].id,
+    });
+  } catch (err) {
+    console.error("DELETE /people/:id error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
