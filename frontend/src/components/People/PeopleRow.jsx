@@ -1,6 +1,6 @@
 import "./PeopleRow.css";
 
-export default function PeopleRow({ person, onDelete }) {
+export default function PeopleRow({ person, onDelete, onEdit }) {
   return (
     <tr className="people-row">
       <td className="people-row-cell people-row-checkbox">
@@ -29,6 +29,7 @@ export default function PeopleRow({ person, onDelete }) {
           type="button"
           className="people-row-action-button"
           style={{ color: "#4338CA" }}
+          onClick={() => onEdit(person)}
         >
           Edit
         </button>

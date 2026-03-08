@@ -11,16 +11,20 @@ export default function PeoplePage() {
   const [showMsg, setShowMsg] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // add new patient fields
+  // patient fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState(0);
+
+  const [formTitle, setFormTitle] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingPersonId, setEditingPersonId] = useState(null);
 
   useEffect(() => {
     apiFetch("/api/people")
       .then((r) => {
-        if (!r.ok) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
@@ -33,27 +37,56 @@ export default function PeoplePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // send req & get res
-    const response = await apiFetch("/api/people/add-patient", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        notes,
-      }),
-    });
+    let response;
+
+    if (isEditMode) {
+      response = await apiFetch(`/api/people/${editingPersonId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          status,
+          notes,
+        }),
+      });
+    } else {
+      // send req & get res
+      response = await apiFetch("/api/people/add-patient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          notes,
+        }),
+      });
+    }
 
     const data = await response.json();
 
     // set msg
     if (response.ok) {
-      setMsg("Patient added successfully");
+      isEditMode
+        ? setMsg("Patient edited successfully")
+        : setMsg("Patient added successfully");
     } else {
-      setMsg("Failed to add patient");
+      isEditMode
+        ? setMsg("Failed to edit patient")
+        : setMsg("Failed to add patient");
+    }
+
+    // refresh people list
+    const listResponse = await apiFetch("/api/people");
+    if (listResponse.ok) {
+      const listData = await listResponse.json();
+      setPeople(listData);
     }
     setShowMsg(true);
 
@@ -89,6 +122,34 @@ export default function PeoplePage() {
     }, 1000);
   };
 
+  const openAddForm = () => {
+    setIsEditMode(false);
+
+    setEditingPersonId(null);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setStatus(0);
+    setNotes("");
+
+    setFormTitle("Add New Patient");
+    setShowAddForm(true);
+  };
+
+  const openEditForm = (person) => {
+    setIsEditMode(true);
+
+    setEditingPersonId(person.id);
+    setName(person.name || "");
+    setEmail(person.email || "");
+    setPhone(person.phone || "");
+    setStatus(person.status === "Active" ? 0 : 1);
+    setNotes(person.notes);
+
+    setFormTitle("Edit Existing Patient");
+    setShowAddForm(true);
+  };
+
   return (
     <div className="people">
       <div className="people-header">
@@ -108,7 +169,7 @@ export default function PeoplePage() {
             className="people-header-button"
             style={{ backgroundColor: "#4338CA", border: "none" }}
             type="button"
-            onClick={() => setShowAddForm(true)}
+            onClick={openAddForm}
           >
             <img
               className="people-header-button-img"
@@ -125,7 +186,7 @@ export default function PeoplePage() {
 
           {showAddForm && (
             <div className="modal">
-              <div className="form-title">Add New Patient</div>
+              <div className="form-title">{formTitle}</div>
               <form onSubmit={handleSubmit}>
                 <div className="form-input-row">
                   <div className="form-input-row-label">Name:</div>
@@ -157,6 +218,34 @@ export default function PeoplePage() {
                     onChange={(e) => setPhone(e.target.value)}
                   ></input>
                 </div>
+                {/* show status only in edit mode */}
+                {isEditMode && (
+                  <div className="form-input-row">
+                    <div className="form-input-row-label">Status:</div>
+
+                    <label>
+                      <input
+                        type="radio"
+                        name="status"
+                        value={0}
+                        checked={status === 0}
+                        onChange={() => setStatus(0)}
+                      />
+                      Active
+                    </label>
+
+                    <label>
+                      <input
+                        type="radio"
+                        name="status"
+                        value={1}
+                        checked={status === 1}
+                        onChange={() => setStatus(1)}
+                      />
+                      Inactive
+                    </label>
+                  </div>
+                )}
                 <div className="form-input-row">
                   <div className="form-input-row-label">Notes:</div>
                   <input
@@ -167,7 +256,6 @@ export default function PeoplePage() {
                     onChange={(e) => setNotes(e.target.value)}
                   ></input>
                 </div>
-
                 <div className="form-button">
                   <button type="submit">Submit</button>
                   <button onClick={() => setShowAddForm(false)} type="button">
@@ -185,6 +273,7 @@ export default function PeoplePage() {
         className="people-table"
         people={people}
         onDelete={handleDelete}
+        onEdit={openEditForm}
       ></PeopleTable>
     </div>
   );

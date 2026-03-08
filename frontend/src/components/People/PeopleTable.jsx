@@ -1,7 +1,7 @@
 import "./PeopleTable.css";
 import PeopleRow from "./PeopleRow";
 
-export default function PeopleTable({ people, onDelete }) {
+export default function PeopleTable({ people, onDelete, onEdit }) {
   return (
     <div className="people-table">
       <table className="people-table-table">
@@ -35,7 +35,12 @@ export default function PeopleTable({ people, onDelete }) {
         </thead>
         <tbody>
           {people.map((person) => (
-            <PeopleRow key={person.id} person={person} onDelete={onDelete} />
+            <PeopleRow
+              key={person.id}
+              person={person}
+              onDelete={onDelete}
+              onEdit={onEdit}
+            />
           ))}
         </tbody>
         <tfoot>

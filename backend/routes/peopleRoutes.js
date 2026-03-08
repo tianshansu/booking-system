@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 
+// get all patients
 router.get("/", async (req, res) => {
   try {
     // Get people + last session date (computed from sessions table)
@@ -44,6 +45,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// add patient
 router.post("/add-patient", async (req, res) => {
   try {
     // get values from req
@@ -68,6 +70,7 @@ router.post("/add-patient", async (req, res) => {
   }
 });
 
+// delete patient
 router.delete("/:id", async (req, res) => {
   try {
     // get person's id
@@ -97,6 +100,46 @@ router.delete("/:id", async (req, res) => {
     });
   } catch (err) {
     console.error("DELETE /people/:id error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// edit patient
+router.put("/:id", async (req, res) => {
+  try {
+    // get person id from params
+    const personId = req.params.id;
+    // get person new info from body
+    const { name, email, phone, status, notes } = req.body;
+
+    // check whether personId has been passed to backend
+    if (Number.isNaN(personId)) {
+      return res.status(400).json({ error: "Invalid person id" });
+    }
+
+    const sql = `
+      UPDATE people
+      SET 
+        name=$1,
+        email=$2,
+        phone=$3,
+        status=$4,
+        notes=$5
+      WHERE id=$6
+      RETURNING id
+    `;
+
+    const { rows } = await pool.query(sql, [
+      name,
+      email,
+      phone,
+      status,
+      notes,
+      personId,
+    ]);
+    res.json(rows[0].id);
+  } catch (err) {
+    console.error("PUT /people/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

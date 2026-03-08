@@ -177,6 +177,60 @@ Response 200:
 }
 ```
 
+## PUT /api/people/:id
+
+Purpose:
+
+- Update a person by `id`.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Path params:
+
+- `id`: person id
+
+Request body:
+
+```json
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "1234567890",
+  "status": 0,
+  "notes": "updated notes"
+}
+```
+
+Request body fields:
+
+name: string
+
+email: string | null
+
+phone: string | null
+
+status: number
+
+notes: string | null
+
+Response 200: 1
+
+Response fields:
+
+number (updated person id)
+
+Errors:
+
+400: Invalid person id
+
+500: Internal server error
+
 # Sessions
 
 ## GET /api/sessions
