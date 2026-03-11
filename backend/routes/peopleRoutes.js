@@ -5,20 +5,21 @@ const { pool } = require("../db");
 // get all patients
 router.get("/", async (req, res) => {
   try {
-    // Get people + last session date (computed from sessions table)
+    // Get people + last past session date (only sessions before now)
     const sql = `
       SELECT
         p.id,
         p.name,
         p.email,
         p.phone,
-        p.status, -- 0/1
+        p.status,
         p.notes,
         MAX(s.start_at) AS last_session
       FROM people p
       LEFT JOIN sessions s
         ON s.patient_id = p.id
-      WHERE p.role = 0  -- only patients (0=patient)
+        AND s.start_at < NOW()
+      WHERE p.role = 0
       GROUP BY p.id
       ORDER BY p.id;
     `;
