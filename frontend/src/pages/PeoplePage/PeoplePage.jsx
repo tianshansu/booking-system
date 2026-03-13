@@ -1,10 +1,14 @@
 import "./PeoplePage.css";
-import PeopleTable from "../../components/people/PeopleTable";
+import PeopleTable from "../../components/People/PeopleTable";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5; // show 5 people on each page
 
   // pop-ups
   const [showAddForm, setShowAddForm] = useState(false);
@@ -23,16 +27,23 @@ export default function PeoplePage() {
   const [editingPersonId, setEditingPersonId] = useState(null);
 
   useEffect(() => {
-    apiFetch("/api/people")
+    fetchPatients();
+  }, [currentPage]);
+
+  // fetch patients
+  const fetchPatients = async () => {
+    apiFetch(`/api/people?limit=${limit}&page=${currentPage}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((data) => {
-        setPeople(data);
+        setPeople(data.data);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
       })
       .catch((e) => console.error("fetch failed:", e));
-  }, []);
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,11 +94,8 @@ export default function PeoplePage() {
     }
 
     // refresh people list
-    const listResponse = await apiFetch("/api/people");
-    if (listResponse.ok) {
-      const listData = await listResponse.json();
-      setPeople(listData);
-    }
+    await fetchPatients();
+
     setShowMsg(true);
 
     setTimeout(() => {
@@ -106,11 +114,12 @@ export default function PeoplePage() {
       method: "DELETE",
     });
 
-    const data = await response.json();
+    await response.json();
 
     // set msg
     if (response.ok) {
-      setPeople((prev) => prev.filter((person) => person.id !== personId));
+      //setPeople((prev) => prev.filter((person) => person.id !== personId));
+      await fetchPatients();
       setMsg("Patient deleted successfully");
     } else {
       setMsg("Failed to delete patient");
@@ -274,6 +283,9 @@ export default function PeoplePage() {
         people={people}
         onDelete={handleDelete}
         onEdit={openEditForm}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        setCurrentPage={setCurrentPage}
       ></PeopleTable>
     </div>
   );

@@ -2,11 +2,17 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 
-// get all patients
+// get patients
 router.get("/", async (req, res) => {
   try {
+    // get current page & limit from query
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+
+    const offset = (page - 1) * limit;
+
     // Get people + last past session date (only sessions before now)
-    const sql = `
+    const dataSql = `
       SELECT
         p.id,
         p.name,
@@ -21,10 +27,12 @@ router.get("/", async (req, res) => {
         AND s.start_at < NOW()
       WHERE p.role = 0
       GROUP BY p.id
-      ORDER BY p.id;
+      ORDER BY p.id
+      LIMIT $1
+      OFFSET $2;
     `;
 
-    const { rows } = await pool.query(sql);
+    const { rows } = await pool.query(dataSql, [limit, offset]);
 
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
@@ -39,7 +47,18 @@ router.get("/", async (req, res) => {
       notes: r.notes,
     }));
 
-    res.json(data);
+    // count total data
+    const countSql = `
+      SELECT COUNT(*) AS total
+      FROM people
+      WHERE role=0;
+    `;
+
+    const result = await pool.query(countSql);
+    const total = Number(result.rows[0].total);
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({ data, page, limit, total, totalPages });
   } catch (err) {
     console.error("GET /people error:", err);
     res.status(500).json({ error: "Internal server error" });

@@ -1,7 +1,7 @@
 import "./PeopleTable.css";
 import PeopleRow from "./PeopleRow";
 
-export default function PeopleTable({ people, onDelete, onEdit }) {
+export default function PeopleTable({ people, onDelete, onEdit, currentPage, totalPages, setCurrentPage }) {
   return (
     <div className="people-table">
       <table className="people-table-table">
@@ -47,17 +47,21 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
           <tr>
             <td colSpan={8} className="people-table-table-footer">
               <div className="people-table-table-footer-content">
-                Showing 1-5 of 42 people
+                Showing page {currentPage} of {totalPages} pages
                 <div className="people-table-table-footer-buttons">
                   <button
                     type="button"
                     className="people-table-table-footer-button"
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                    disabled={currentPage === 1}
                   >
                     Previous
                   </button>
                   <button
                     type="button"
                     className="people-table-table-footer-button"
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    disabled={currentPage === totalPages}
                   >
                     Next
                   </button>
