@@ -25,7 +25,7 @@ Content-Type:
 
 Purpose:
 
-- Get a list of patients (role=0) with their last session date.
+- Get a paginated list of patients (`role=0`) with their last past session date.
 
 Auth:
 
@@ -33,7 +33,8 @@ Auth:
 
 Query params:
 
-- None (for now)
+- `page`: number, optional, default = `1`
+- `limit`: number, optional, default = `5`
 
 Request body:
 
@@ -42,20 +43,29 @@ Request body:
 Response 200:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "phone": "1234567890",
-    "status": "Active",
-    "lastSession": "2024-01-15",
-    "notes": "not come for sessions for a long time"
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "1234567890",
+      "status": "Active",
+      "lastSession": "2024-01-15",
+      "notes": "not come for sessions for a long time"
+    }
+  ],
+  "page": 1,
+  "limit": 5,
+  "total": 12,
+  "totalPages": 3
+}
 ```
-
 Response fields:
+
+data: array of patient objects
+
+Patient object fields:
 
 id: number
 
@@ -71,9 +81,20 @@ lastSession: "YYYY-MM-DD" | null
 
 notes: string | null
 
+Pagination fields:
+
+page: number
+
+limit: number
+
+total: number
+
+totalPages: number
+
 Errors:
 
 500: Database error
+
 
 ## POST /api/people/add-patient
 
