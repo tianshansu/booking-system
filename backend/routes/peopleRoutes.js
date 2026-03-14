@@ -65,6 +65,40 @@ router.get("/", async (req, res) => {
   }
 });
 
+// get all patient names & ids
+router.get("/patients/options", async (req, res) => {
+  try {
+    const sql = `
+      SELECT id,name
+      FROM people
+      WHERE role=0
+      ORDER BY name ASC
+    `;
+    const { rows } = await pool.query(sql);
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /people/patients/options error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get all staff names & ids
+router.get("/staff/options", async (req, res) => {
+  try {
+    const sql = `
+      SELECT id,name
+      FROM people
+      WHERE role=1
+      ORDER BY name ASC
+    `;
+    const { rows } = await pool.query(sql);
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /people/staff/options error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // add patient
 router.post("/add-patient", async (req, res) => {
   try {
