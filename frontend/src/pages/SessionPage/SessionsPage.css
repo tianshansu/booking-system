@@ -1,31 +1,30 @@
-.sessions{
+.sessions {
     display: grid;
     min-height: 100vh;
-    align-content: start; 
+    align-content: start;
     gap: 20px;
- }
- 
- .sessions-header{
-     display: flex;
-     justify-content: space-between;
-     width:100%;
- }
- 
- .sessions-header-buttons{
-     display: flex;
-     gap: 10px;
- }
- 
- .sessions-header-button-img{
-     width: 20px;
- }
- 
- .sessions-header-button{
-     display: flex;
-     gap: 10px;
-     align-items: center;
-     padding: 14px;
-     height: 40px;
-     cursor: pointer;
- }
- 
+}
+
+.sessions-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.sessions-header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.sessions-header-button-img {
+    width: 20px;
+}
+
+.sessions-header-button {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 14px;
+    height: 40px;
+    cursor: pointer;
+}

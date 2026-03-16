@@ -17,12 +17,12 @@ export default function SessionsFilterBar() {
             <option value="inactive">Inactive</option>
           </select>
 
-          <select className="sessions-filter-bar-item-select">
+          {/* <select className="sessions-filter-bar-item-select">
             <option value="">Type: All</option>
             <option value="consultation">Consultation</option>
             <option value="training">Training</option>
             <option value="follow-up">Follow-up</option>
-          </select>
+          </select> */}
 
           <select className="sessions-filter-bar-item-select">
             <option value="">Staff: All</option>

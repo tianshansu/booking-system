@@ -1,6 +1,6 @@
 import "./SessionsRow.css";
 
-export default function SessionsRow({ session }) {
+export default function SessionsRow({ session, onEdit }) {
   return (
     <tr className="sessions-row">
       <td className="sessions-row-cell sessions-row-checkbox">
@@ -16,7 +16,13 @@ export default function SessionsRow({ session }) {
         <p>{session.staff}</p>
       </td>
       <td className="sessions-row-cell">
-        <p>{session.status}</p>
+        <p>
+          {session.status === 0
+            ? "Scheduled"
+            : session.status === 1
+              ? "Completed"
+              : "Canceled"}
+        </p>
       </td>
       <td className="sessions-row-cell">
         <p>{session.date}</p>
@@ -32,6 +38,9 @@ export default function SessionsRow({ session }) {
           type="button"
           className="sessions-row-action-button"
           style={{ color: "#4338CA" }}
+          onClick={() => {
+            onEdit(session);
+          }}
         >
           Edit
         </button>
