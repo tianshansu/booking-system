@@ -28,7 +28,7 @@ export default function DashboardPage() {
         return r.json();
       })
       .then((data) => {
-        setSessions(data);
+        setSessions(Array.isArray(data) ? data : data.data || []);
       })
       .catch((e) => console.error("fetch failed:", e));
 

@@ -1,4 +1,6 @@
 import "./PeoplePage.css";
+import "../../styles/form.css";
+import "../../styles/popups.css";
 import PeopleTable from "../../components/People/PeopleTable";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
@@ -43,7 +45,7 @@ export default function PeoplePage() {
         setTotalPages(data.totalPages);
       })
       .catch((e) => console.error("fetch failed:", e));
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +82,7 @@ export default function PeoplePage() {
       });
     }
 
-    const data = await response.json();
+    await response.json();
 
     // set msg
     if (response.ok) {
@@ -194,33 +196,33 @@ export default function PeoplePage() {
           </button>
 
           {showAddForm && (
-            <div className="modal">
-              <div className="form-title">{formTitle}</div>
+            <div className="app-modal">
+              <div className="app-form-title">{formTitle}</div>
               <form onSubmit={handleSubmit}>
-                <div className="form-input-row">
-                  <div className="form-input-row-label">Name:</div>
+                <div className="app-form-input-row">
+                  <div className="app-form-input-row-label">Name:</div>
                   <input
-                    className="form-input-row-value"
+                    className="app-form-input-row-value"
                     type="text"
                     placeholder="Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   ></input>
                 </div>
-                <div className="form-input-row">
-                  <div className="form-input-row-label">Email:</div>
+                <div className="app-form-input-row">
+                  <div className="app-form-input-row-label">Email:</div>
                   <input
-                    className="form-input-row-value"
+                    className="app-form-input-row-value"
                     type="text"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   ></input>
                 </div>
-                <div className="form-input-row">
-                  <div className="form-input-row-label">Phone:</div>
+                <div className="app-form-input-row">
+                  <div className="app-form-input-row-label">Phone:</div>
                   <input
-                    className="form-input-row-value"
+                    className="app-form-input-row-value"
                     type="text"
                     placeholder="Phone"
                     value={phone}
@@ -229,8 +231,8 @@ export default function PeoplePage() {
                 </div>
                 {/* show status only in edit mode */}
                 {isEditMode && (
-                  <div className="form-input-row">
-                    <div className="form-input-row-label">Status:</div>
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">Status:</div>
 
                     <label>
                       <input
@@ -255,21 +257,21 @@ export default function PeoplePage() {
                     </label>
                   </div>
                 )}
-                <div className="form-input-row">
-                  <div className="form-input-row-label">Notes:</div>
+                <div className="app-form-input-row">
+                  <div className="app-form-input-row-label">Notes:</div>
                   <input
-                    className="form-input-row-value"
+                    className="app-form-input-row-value"
                     type="text"
                     placeholder="Notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                   ></input>
                 </div>
-                <div className="form-button">
-                  <button type="submit">Submit</button>
+                <div className="app-form-buttons">
                   <button onClick={() => setShowAddForm(false)} type="button">
                     Cancel
                   </button>
+                  <button type="submit">Submit</button>
                 </div>
               </form>
             </div>

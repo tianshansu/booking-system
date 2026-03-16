@@ -108,6 +108,7 @@ Response 200:
   "totalPages": 3
 }
 ```
+
 Response fields:
 
 data: array of patient objects
@@ -142,6 +143,93 @@ Errors:
 
 500: Database error
 
+## GET /api/people/patients/options
+
+Purpose:
+
+- Get all patient ids and names for select/dropdown options.
+- Only returns people with `role=0`.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith"
+  }
+]
+```
+
+Response fields:
+
+id: number
+
+name: string
+
+Errors:
+
+500: Internal server error
+
+## GET /api/people/staff/options
+
+Purpose:
+
+- Get all staff ids and names for select/dropdown options.
+- Only returns people with `role=1`.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+[
+  {
+    "id": 10,
+    "name": "Dr Smith"
+  },
+  {
+    "id": 11,
+    "name": "Dr Brown"
+  }
+]
+```
+
+Response fields:
+
+id: number
+
+name: string
+
+Errors:
+
+500: Internal server error
 
 ## POST /api/people/add-patient
 
@@ -305,7 +393,8 @@ Errors:
 
 Purpose:
 
-- Get a list of sessions with patient/staff names (joined from `people`).
+- Get a paginated list of sessions with patient/staff names (joined from `people`).
+- Return frontend-friendly session fields.
 
 Auth:
 
@@ -313,7 +402,8 @@ Auth:
 
 Query params:
 
-- None (for now)
+- `page`: number, optional, default = `1`
+- `limit`: number, optional, default = `5`
 
 Request body:
 
@@ -322,41 +412,239 @@ Request body:
 Response 200:
 
 ```json
-[
-  {
-    "id": 1,
-    "title": "Regular Meet",
-    "patientName": "John Doe",
-    "staff": "Dr Smith",
-    "status": "Scheduled",
-    "date": "2024-01-15",
-    "time": "02:00",
-    "duration": "60m"
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Regular Meet",
+      "patientName": "John Doe",
+      "patientId": 1,
+      "staff": "Dr Smith",
+      "staffId": 2,
+      "status": 0,
+      "date": "2024-01-15",
+      "time": "14:00",
+      "startAt": "2024-01-15T14:00",
+      "endAt": "2024-01-15T15:00",
+      "duration": "60m"
+    }
+  ],
+  "page": 1,
+  "limit": 5,
+  "total": 20,
+  "totalPages": 4
+}
+```
+
+Response fields:
+
+data: array
+
+data[].id: number
+
+data[].title: string
+
+data[].patientName: string
+
+data[].patientId: number
+
+data[].staff: string
+
+data[].staffId: number
+
+data[].status: number // 0=scheduled, 1=completed, 2=cancelled
+
+data[].date: "YYYY-MM-DD"
+
+data[].time: "HH:mm"
+
+data[].startAt: "YYYY-MM-DDTHH:mm"
+
+data[].endAt: "YYYY-MM-DDTHH:mm"
+
+data[].duration: string | null // e.g. "60m"
+
+page: number
+
+limit: number
+
+total: number
+
+totalPages: number
+
+Errors:
+
+500: Internal server error
+
+## POST /api/sessions/add-session
+
+Purpose:
+
+- Create a new session in `sessions` with:
+  - `status=0` (scheduled)
+  - linked patient and staff
+  - Melbourne timezone start/end datetime
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+```json
+{
+  "sessionName": "Initial Consultation",
+  "patientId": 1,
+  "staffId": 2,
+  "startAt": "2026-03-14T14:00:00",
+  "endAt": "2026-03-14T15:00:00"
+}
+```
+
+Request body fields:
+
+sessionName: string (required)
+
+patientId: number | string (required)
+
+staffId: number | string (required)
+
+startAt: ISO datetime string (required)
+
+endAt: ISO datetime string (required)
+
+Response 201:
+
+```json
+{
+  "id": 1,
+  "name": "Initial Consultation",
+  "patient_id": 1,
+  "staff_id": 2,
+  "status": 0,
+  "start_at": "2026-03-14T14:00:00.000+11:00",
+  "end_at": "2026-03-14T15:00:00.000+11:00"
+}
 ```
 
 Response fields:
 
 id: number
 
-title: string
+name: string
 
-patientName: string
+patient_id: number
 
-staff: string
+staff_id: number
 
-status: "Scheduled" | "Completed" | "Cancelled"
+status: number
 
-date: "YYYY-MM-DD"
+start_at: ISO datetime string
 
-time: "HH:mm"
-
-duration: string | null // e.g. "30m"
+end_at: ISO datetime string
 
 Errors:
 
-500: Database error
+400: Name is required
+
+400: Invalid patient or staff id
+
+400: Invalid date/time format
+
+400: Start time must be earlier than end time
+
+500: Internal server error
+
+## PUT /api/sessions/:id
+
+Purpose:
+
+- Update a session by `id`.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Path params:
+
+- `id`: session id
+
+Request body:
+
+```json
+{
+  "sessionName": "Follow-up Session",
+  "patientId": 1,
+  "staffId": 2,
+  "status": 1,
+  "startAt": "2026-03-14T14:00:00",
+  "endAt": "2026-03-14T15:00:00"
+}
+```
+
+Request body fields:
+
+sessionName: string (required)
+
+patientId: number | string
+
+staffId: number | string
+
+status: number
+
+startAt: ISO datetime string (required)
+
+endAt: ISO datetime string (required)
+
+Response 200:
+
+```json
+{
+  "id": 1,
+  "name": "Follow-up Session",
+  "patient_id": 1,
+  "staff_id": 2,
+  "status": 1,
+  "start_at": "2026-03-14T14:00:00.000+11:00",
+  "end_at": "2026-03-14T15:00:00.000+11:00"
+}
+```
+
+Response fields:
+
+id: number
+
+name: string
+
+patient_id: number
+
+staff_id: number
+
+status: number
+
+start_at: ISO datetime string
+
+end_at: ISO datetime string
+
+Errors:
+
+400: Invalid session id
+
+400: Name is required
+
+400: Invalid date/time format
+
+400: Start time must be earlier than end time
+
+500: Internal server error
 
 # Dashboard
 
