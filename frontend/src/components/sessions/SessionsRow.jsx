@@ -3,9 +3,9 @@ import "./SessionsRow.css";
 export default function SessionsRow({ session, onEdit, onDelete }) {
   return (
     <tr className="sessions-row">
-      <td className="sessions-row-cell sessions-row-checkbox">
+      {/* <td className="sessions-row-cell sessions-row-checkbox">
         <input type="checkbox"></input>
-      </td>
+      </td> */}
       <td className="sessions-row-cell">
         <p>{session.title}</p>
       </td>

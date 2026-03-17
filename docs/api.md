@@ -394,6 +394,7 @@ Errors:
 Purpose:
 
 - Get a paginated list of sessions with patient/staff names (joined from `people`).
+- Support filtering by session status and staff.
 - Return frontend-friendly session fields.
 
 Auth:
@@ -404,6 +405,8 @@ Query params:
 
 - `page`: number, optional, default = `1`
 - `limit`: number, optional, default = `5`
+- `status`: number, optional, session status filter
+- `staffId`: number, optional, staff id filter
 
 Request body:
 
@@ -452,7 +455,7 @@ data[].staff: string
 
 data[].staffId: number
 
-data[].status: number // 0=scheduled, 1=completed, 2=cancelled
+data[].status: number
 
 data[].date: "YYYY-MM-DD"
 
@@ -462,7 +465,7 @@ data[].startAt: "YYYY-MM-DDTHH:mm"
 
 data[].endAt: "YYYY-MM-DDTHH:mm"
 
-data[].duration: string | null // e.g. "60m"
+data[].duration: string | null
 
 page: number
 

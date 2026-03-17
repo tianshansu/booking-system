@@ -15,9 +15,9 @@ export default function SessionsTable({
       <table className="sessions-table-table">
         <thead>
           <tr>
-            <th scope="col" className="sessions-table-table-header">
+            {/* <th scope="col" className="sessions-table-table-header">
               <input type="checkbox"></input>
-            </th>
+            </th> */}
             <th scope="col" className="sessions-table-table-header">
               SESSION
             </th>

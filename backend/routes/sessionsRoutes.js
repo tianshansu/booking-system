@@ -10,7 +10,11 @@ router.get("/", async (req, res) => {
     const limit = Number(req.query.limit) || 5;
     const offset = (page - 1) * limit;
 
-    const sql = `
+    // filter
+    const status = req.query.status;
+    const staffId = req.query.staffId;
+
+    let sql = `
       SELECT
         s.id,
         s.name,
@@ -34,11 +38,35 @@ router.get("/", async (req, res) => {
       FROM sessions s
       JOIN people patient ON s.patient_id = patient.id
       JOIN people staff   ON s.staff_id   = staff.id
-      ORDER BY s.start_at DESC
-      LIMIT $1
-      OFFSET $2;
+      WHERE 1=1
     `;
-    const { rows } = await pool.query(sql, [limit, offset]);
+
+    const values = [];
+    let index = 1;
+
+    //put status into sql
+    if (status !== undefined && status !== "") {
+      sql += ` AND s.status = $${index}`;
+      values.push(Number(status));
+      index++;
+    }
+
+    //put staffId into sql
+    if (staffId !== undefined && staffId !== "") {
+      sql += ` AND s.staff_id = $${index}`;
+      values.push(Number(staffId));
+      index++;
+    }
+
+    // add the remaining sql
+    sql += `
+      ORDER BY s.start_at DESC
+      LIMIT $${index}
+      OFFSET $${index + 1};
+    `;
+
+    values.push(limit, offset);
+    const { rows } = await pool.query(sql, values);
 
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
@@ -59,11 +87,31 @@ router.get("/", async (req, res) => {
     }));
 
     // count total data
-    const countSql = `
+    let countSql = `
       SELECT COUNT(*) AS total
       FROM sessions
+      WHERE 1=1
     `;
-    const result = await pool.query(countSql);
+
+    const countValues = [];
+    let countIndex = 1;
+
+    //put status into sql
+    if (status !== undefined && status !== "") {
+      countSql += ` AND status = $${countIndex}`;
+      countValues.push(Number(status));
+      countIndex++;
+    }
+
+    //put staffId into sql
+    if (staffId !== undefined && staffId !== "") {
+      countSql += ` AND staff_id = $${countIndex};`;
+      countValues.push(Number(staffId));
+      countIndex++;
+    }
+
+    const result = await pool.query(countSql, countValues);
+
     const total = Number(result.rows[0].total);
     const totalPages = Math.ceil(total / limit);
     res.json({ data, page, limit, total, totalPages });

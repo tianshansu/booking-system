@@ -30,8 +30,14 @@ export default function SessionsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
 
+  //filter
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStaffId, setFilterStaffId] = useState("");
+
   const fetchSessions = useCallback(async () => {
-    apiFetch(`/api/sessions?limit=${limit}&page=${currentPage}`)
+    apiFetch(
+      `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}`,
+    )
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -41,7 +47,7 @@ export default function SessionsPage() {
         setTotalPages(data.totalPages || 1);
       })
       .catch((e) => console.error("fetch failed:", e));
-  }, [currentPage]);
+  }, [currentPage, filterStatus, filterStaffId]);
 
   useEffect(() => {
     fetchSessions();
@@ -185,6 +191,14 @@ export default function SessionsPage() {
       setShowMsg(false);
     }, 1000);
   };
+
+  // filter clear
+  const handleFilterClear = () => {
+    // reset filter
+    setFilterStatus("");
+    setFilterStaffId("");
+  };
+
   return (
     <>
       <div className="sessions">
@@ -332,7 +346,14 @@ export default function SessionsPage() {
             </div>
           </div>
         </div>
-        <SessionsFilterBar />
+        <SessionsFilterBar
+          onFilterStatus={setFilterStatus}
+          filterStatus={filterStatus}
+          onFilterStaff={setFilterStaffId}
+          filterStaff={filterStaffId}
+          staffOptions={staffOptions}
+          onClear={handleFilterClear}
+        />
         <SessionsTable
           sessions={sessions}
           onEdit={openEditForm}
