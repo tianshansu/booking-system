@@ -8,6 +8,7 @@ export default function SessionsTable({
   setCurrentPage,
   currentPage,
   totalPages,
+  onDelete,
 }) {
   return (
     <div className="sessions-table">
@@ -45,7 +46,12 @@ export default function SessionsTable({
         </thead>
         <tbody>
           {sessions.map((session) => (
-            <SessionsRow key={session.id} session={session} onEdit={onEdit} />
+            <SessionsRow
+              key={session.id}
+              session={session}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           ))}
         </tbody>
         <tfoot>

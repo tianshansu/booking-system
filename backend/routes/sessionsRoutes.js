@@ -61,8 +61,7 @@ router.get("/", async (req, res) => {
     // count total data
     const countSql = `
       SELECT COUNT(*) AS total
-      FROM people
-      WHERE role=0;
+      FROM sessions
     `;
     const result = await pool.query(countSql);
     const total = Number(result.rows[0].total);
@@ -204,6 +203,19 @@ router.put("/:id", async (req, res) => {
     console.error("POST /sessions/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+//delete a session
+router.delete("/:id", async (req, res) => {
+  const sessionId = req.params.id;
+  const sql = `
+    DELETE FROM sessions
+    WHERE id=$1
+    RETURNING *
+  `;
+
+  const { rows } = await pool.query(sql, [sessionId]);
+  res.json(rows[0]);
 });
 
 module.exports = router;

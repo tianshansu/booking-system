@@ -1,6 +1,6 @@
 import "./SessionsRow.css";
 
-export default function SessionsRow({ session, onEdit }) {
+export default function SessionsRow({ session, onEdit, onDelete }) {
   return (
     <tr className="sessions-row">
       <td className="sessions-row-cell sessions-row-checkbox">
@@ -48,6 +48,7 @@ export default function SessionsRow({ session, onEdit }) {
           type="button"
           className="sessions-row-action-button"
           style={{ color: "#DC2626" }}
+          onClick={() => onDelete(session.id)}
         >
           Delete
         </button>

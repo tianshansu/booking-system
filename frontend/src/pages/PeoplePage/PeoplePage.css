@@ -28,13 +28,3 @@
   height: 40px;
   cursor: pointer;
 }
-
-.toast-message {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #4338ca;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 8px;
-}
