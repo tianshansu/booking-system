@@ -1,6 +1,13 @@
 import "./SessionsFilterBar.css";
 
-export default function SessionsFilterBar() {
+export default function SessionsFilterBar({
+  onFilterStatus,
+  filterStatus,
+  onFilterStaff,
+  filterStaff,
+  staffOptions,
+  onClear,
+}) {
   return (
     <div className="sessions-filter-bar">
       <div className="sessions-filter-bar-item">
@@ -11,28 +18,32 @@ export default function SessionsFilterBar() {
             alt="filter"
           />
           <div>Filter by:</div>
-          <select className="sessions-filter-bar-item-select">
+          <select
+            className="sessions-filter-bar-item-select"
+            onChange={(e) => onFilterStatus(e.target.value)}
+            value={filterStatus}
+          >
             <option value="">Status: All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="0">Scheduled</option>
+            <option value="1">Completed</option>
+            <option value="2">Canceled</option>
           </select>
 
-          <select className="sessions-filter-bar-item-select">
-            <option value="">Type: All</option>
-            <option value="consultation">Consultation</option>
-            <option value="training">Training</option>
-            <option value="follow-up">Follow-up</option>
-          </select>
-
-          <select className="sessions-filter-bar-item-select">
+          <select
+            className="sessions-filter-bar-item-select"
+            onChange={(e) => onFilterStaff(e.target.value)}
+            value={filterStaff}
+          >
             <option value="">Staff: All</option>
-            <option value="staff1">Staff 1</option>
-            <option value="staff2">Staff 2</option>
-            <option value="staff3">Staff 3</option>
+            {staffOptions.map((staff) => (
+              <option key={staff.id} value={staff.id}>
+                {staff.name}
+              </option>
+            ))}
           </select>
         </div>
         <div className="sessions-filter-bar-item-right">
-          <button className="sessions-filter-bar-item-button">
+          <button className="sessions-filter-bar-item-button" onClick={onClear}>
             Clear filters
           </button>
         </div>
