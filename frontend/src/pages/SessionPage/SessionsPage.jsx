@@ -160,6 +160,31 @@ export default function SessionsPage() {
     //close the form
     setShowForm(false);
   };
+
+  // delete a session
+  const handleDelete = async (sessionId) => {
+    const response = await apiFetch(`/api/sessions/${sessionId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    await response.json();
+
+    if (response.ok) {
+      setMsg("Session deleted successfully");
+    } else {
+      setMsg("Failed to delete session");
+    }
+    //refresh
+    await fetchSessions();
+
+    setShowMsg(true);
+    setTimeout(() => {
+      setShowMsg(false);
+    }, 1000);
+  };
   return (
     <>
       <div className="sessions">
@@ -314,6 +339,7 @@ export default function SessionsPage() {
           setCurrentPage={setCurrentPage}
           currentPage={currentPage}
           totalPages={totalPages}
+          onDelete={handleDelete}
         />
       </div>
     </>
