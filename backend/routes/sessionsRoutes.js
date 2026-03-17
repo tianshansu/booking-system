@@ -207,15 +207,20 @@ router.put("/:id", async (req, res) => {
 
 //delete a session
 router.delete("/:id", async (req, res) => {
-  const sessionId = req.params.id;
-  const sql = `
-    DELETE FROM sessions
-    WHERE id=$1
-    RETURNING *
-  `;
+  try {
+    const sessionId = req.params.id;
+    const sql = `
+      DELETE FROM sessions
+      WHERE id=$1
+      RETURNING *
+    `;
 
-  const { rows } = await pool.query(sql, [sessionId]);
-  res.json(rows[0]);
+    const { rows } = await pool.query(sql, [sessionId]);
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("DELETE /sessions/:id error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;
