@@ -705,6 +705,76 @@ Errors:
 
 500: Internal server error
 
+## PATCH /api/sessions/:id/status
+
+Purpose:
+
+- Update the status of a session by `id`.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Path params:
+
+- `id`: session id
+
+Request body:
+
+```json
+{
+  "status": 1
+}
+```
+
+Request body fields:
+
+status: number (required) // 0=scheduled, 1=completed, 2=cancelled
+
+Response 200:
+
+```json
+{
+  "id": 1,
+  "name": "Follow-up Session",
+  "patient_id": 1,
+  "staff_id": 2,
+  "status": 1,
+  "start_at": "2026-03-14T14:00:00.000+11:00",
+  "end_at": "2026-03-14T15:00:00.000+11:00"
+}
+```
+
+Response fields:
+
+id: number
+
+name: string
+
+patient_id: number
+
+staff_id: number
+
+status: number
+
+start_at: ISO datetime string
+
+end_at: ISO datetime string
+
+Errors:
+
+400: Invalid session id
+
+400: Invalid status
+
+404: Session not found
+
+500: Internal server error
+
 # Dashboard
 
 ## GET /api/dashboard/summary

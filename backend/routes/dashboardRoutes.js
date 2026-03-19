@@ -33,7 +33,7 @@ router.get("/summary", async (req, res) => {
 
         COUNT(*) FILTER (
           WHERE s.start_at::date > CURRENT_DATE
-            AND s.start_at::date < (CURRENT_DATE + INTERVAL '7 days')
+            AND s.start_at::date <= (CURRENT_DATE + INTERVAL '7 days')
             AND s.status = 0
         ) AS upcoming_count,
 
@@ -47,6 +47,7 @@ router.get("/summary", async (req, res) => {
           COUNT(p.id) 
           FROM people p 
           WHERE p.status = 0
+            AND p.role = 0
         ) AS active_people
       FROM sessions s;
     `;
@@ -71,6 +72,74 @@ router.get("/summary", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("GET /dashboard/summary error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get sessions overview
+router.get("/sessions", async (req, res) => {
+  // get today's sessions
+  try {
+    todaySql = `
+      SELECT 
+        s.id,
+        s.name,
+        s.patient_id AS patient_id,
+        patient.name AS patient_name,
+        s.staff_id AS staff_id,
+        staff.name AS staff_name,
+        s.status,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'YYYY-MM-DD') AS date,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'HH24:MI')    AS time
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff ON s.staff_id = staff.id
+      WHERE s.start_at::date = CURRENT_DATE 
+        AND s.status = 0;
+    `;
+
+    const { rows: todayRows } = await pool.query(todaySql);
+
+    const mapSession = (row) => ({
+      id: row.id,
+      name: row.name,
+      patientId: row.patient_id,
+      patientName: row.patient_name,
+      staffId: row.staff_id,
+      staffName: row.staff_name,
+      status: row.status,
+      date: row.date,
+      time: row.time,
+    });
+
+    // get next 7 days sessions
+    const upcomingSql = `
+      SELECT 
+        s.id,
+        s.name,
+        s.patient_id AS patient_id,
+        patient.name AS patient_name,
+        s.staff_id AS staff_id,
+        staff.name AS staff_name,
+        s.status,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'YYYY-MM-DD') AS date,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'HH24:MI')    AS time
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff ON s.staff_id = staff.id
+      WHERE s.start_at::date > CURRENT_DATE 
+        AND s.start_at::date <= CURRENT_DATE + INTERVAL '7 days'
+        AND s.status = 0 ;
+    `;
+
+    const { rows: upcomingRows } = await pool.query(upcomingSql);
+
+    res.json({
+      todaySessions: todayRows.map(mapSession),
+      upcomingSessions: upcomingRows.map(mapSession),
+    });
+  } catch (err) {
+    console.error("GET /dashboard/sessions error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

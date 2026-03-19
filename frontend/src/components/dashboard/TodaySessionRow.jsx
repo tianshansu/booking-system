@@ -1,4 +1,13 @@
-export default function TodaySessionRow({ session }) {
+import { useState } from "react";
+import "../../styles/popups.css";
+
+export default function TodaySessionRow({
+  session,
+  onMarkCompleted,
+  onMarkCanceled,
+}) {
+  const [showOptions, setShowOptions] = useState(false);
+
   const styles = {
     row: {
       display: "flex",
@@ -16,27 +25,48 @@ export default function TodaySessionRow({ session }) {
     icon: {
       height: 20,
     },
-    button: {
-      background: "none",
-      border: "none",
-    },
   }; // style
-
-  const viewMoreButton = () => {
-    alert("Today's Sessions more button clicked!");
-  };
 
   return (
     <div style={styles.row}>
       <div style={styles.time}>{session.time}</div>
       <div style={styles.info}>
-        <div style={{ fontWeight: 600 }}>{session.title}</div>
+        <div style={{ fontWeight: 600 }}>{session.name}</div>
         <div style={{ color: "gray" }}>{session.patientName}</div>
-        <div>{session.status}</div>
+        <div>{session.status === 0 ? "Scheduled" : "Completed"}</div>
       </div>
-      <button type="button" style={styles.button} onClick={viewMoreButton}>
-        <img src="/icons/more.svg" style={styles.icon} alt="more info"></img>
-      </button>
+      <div className="actions">
+        <button
+          type="button"
+          className="button"
+          onClick={() => setShowOptions((prev) => !prev)}
+        >
+          <img src="/icons/more.svg" style={styles.icon} alt="more info"></img>
+        </button>
+
+        {showOptions && (
+          <div className="menu">
+            <button
+              className="menu-items"
+              onClick={() => {
+                setShowOptions(false);
+                onMarkCompleted(session.id);
+              }}
+            >
+              Mark As Completed
+            </button>
+            <button
+              className="menu-items"
+              onClick={() => {
+                setShowOptions(false);
+                onMarkCanceled(session.id);
+              }}
+            >
+              Mark As Canceled
+            </button>
+          </div>
+        )}
+      </div>
     </div>
     // details in render
   );

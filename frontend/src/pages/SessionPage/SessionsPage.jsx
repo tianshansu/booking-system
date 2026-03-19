@@ -148,10 +148,10 @@ export default function SessionsPage() {
     if (response.ok) {
       isEditMode
         ? setMsg("Session edited successfully")
-        : setMsg("Failed to edit session");
+        : setMsg("Session added successfully");
     } else {
       isEditMode
-        ? setMsg("Session added successfully")
+        ? setMsg("Failed to edit session")
         : setMsg("Failed to add session");
     }
 
