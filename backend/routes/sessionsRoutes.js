@@ -248,7 +248,7 @@ router.put("/:id", async (req, res) => {
 
     res.json(rows[0]);
   } catch (err) {
-    console.error("POST /sessions/:id error:", err);
+    console.error("PUT /sessions/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -267,6 +267,40 @@ router.delete("/:id", async (req, res) => {
     res.json(rows[0]);
   } catch (err) {
     console.error("DELETE /sessions/:id error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// change status of a session
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const sessionId = Number(req.params.id);
+    const status = Number(req.body.status);
+
+    if (!Number.isInteger(sessionId)) {
+      return res.status(400).json({ error: "Invalid session id" });
+    }
+
+    if (![0, 1, 2].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const sql = `
+      UPDATE sessions
+      SET status = $1
+      WHERE id = $2
+      RETURNING *
+    `;
+
+    const { rows } = await pool.query(sql, [status, sessionId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("PATCH /sessions/:id/status error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

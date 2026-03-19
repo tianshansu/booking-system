@@ -1,8 +1,18 @@
-export default function TodaySessionList({ sessions, RowComponent }) {
+export default function TodaySessionList({
+  sessions,
+  RowComponent,
+  onMarkCompleted,
+  onMarkCanceled,
+}) {
   return (
     <div>
-      {sessions.map((item) => (
-        <RowComponent key={item.id} session={item} />
+      {sessions.map((session) => (
+        <RowComponent
+          key={session.id}
+          session={session}
+          onMarkCompleted={onMarkCompleted}
+          onMarkCanceled={onMarkCanceled}
+        />
       ))}
     </div>
   );

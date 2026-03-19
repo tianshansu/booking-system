@@ -1,4 +1,5 @@
 import "./Dashboard.css";
+import "../../styles/popups.css";
 import Card from "../../components/common/Card";
 import ListPanel from "../../components/common/ListPanel";
 import TodaySessionList from "../../components/dashboard/TodaySessionList";
@@ -11,7 +12,8 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
 export default function DashboardPage() {
-  const [sessions, setSessions] = useState([]);
+  const [todaySessions, setTodaySessions] = useState([]);
+  const [upcomingSessions, setUpcomingSessions] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
   const [summary, setSummary] = useState({
     todaySessions: 0,
@@ -20,15 +22,82 @@ export default function DashboardPage() {
     activePeople: 0,
   });
 
+  const todayDate = new Date();
+  const todayDateFormat = todayDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const todayPreview = todaySessions.slice(0, 4); //take top 4 records to display
+  const upcomingPreview = upcomingSessions.slice(0, 4); //take top 4 records to display
+
+  // pop-ups
+  const [showMsg, setShowMsg] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const showMessage = (text) => {
+    setMsg(text);
+
+    setShowMsg(true);
+
+    setTimeout(() => {
+      setShowMsg(false);
+    }, 1000);
+  };
+
+  const SESSION_STATUS = {
+    SCHEDULED: 0,
+    COMPLETED: 1,
+    CANCELED: 2,
+  };
+
+  const updateSessionStatus = async (sessionId, status) => {
+    const response = await apiFetch(`/api/sessions/${sessionId}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+      }),
+    });
+    if (!response || !response.ok) {
+      throw new Error("Failed to update session status");
+    }
+  };
+
+  const handleMarkComplete = async (sessionId) => {
+    try {
+      await updateSessionStatus(sessionId, SESSION_STATUS.COMPLETED);
+      showMessage("session successfully marked as completed");
+    } catch (err) {
+      console.error("Mark complete error:", err);
+      showMessage("session is unable to mark as completed, please try again");
+    }
+  };
+
+  const handleMarkCancel = async (sessionId) => {
+    try {
+      await updateSessionStatus(sessionId, SESSION_STATUS.CANCELED);
+      showMessage("session successfully marked as canceled");
+    } catch (err) {
+      console.error("Mark complete error:", err);
+      showMessage("session is unable to mark as canceled, please try again");
+    }
+  };
+
   useEffect(() => {
-    apiFetch("/api/sessions")
+    apiFetch("/api/dashboard/sessions")
       .then((r) => {
         if (!r) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((data) => {
-        setSessions(Array.isArray(data) ? data : data.data || []);
+        setTodaySessions(data.todaySessions);
+        setUpcomingSessions(data.upcomingSessions);
       })
       .catch((e) => console.error("fetch failed:", e));
 
@@ -54,14 +123,6 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("fetch failed:", e));
   }, []);
-
-  const TODAY = new Date().toLocaleDateString("en-CA"); // 2026-03-03
-  const todaySessions = sessions.filter((s) => s.date === TODAY); //filter out today's sessions
-  const upcomingSessions = sessions.filter(
-    (s) => s.date > TODAY && s.status !== "Completed",
-  ); //filter upcoming sessions
-  const todayPreview = todaySessions.slice(0, 4); //take top 4 records to display
-  const upcomingPreview = upcomingSessions.slice(0, 4); //take top 4 records to display
 
   return (
     <div style={{ display: "grid" }}>
@@ -104,7 +165,7 @@ export default function DashboardPage() {
       >
         <ListPanel
           title="Today's Sessions"
-          date="Wednesday, January 15, 2025"
+          date={todayDateFormat}
           footer={
             <button
               type="button"
@@ -125,6 +186,8 @@ export default function DashboardPage() {
           <TodaySessionList
             sessions={todayPreview}
             RowComponent={TodaySessionRow}
+            onMarkCompleted={handleMarkComplete}
+            onMarkCanceled={handleMarkCancel}
           ></TodaySessionList>
           {/* send corresponding session data and the RowComponent to list */}
         </ListPanel>
@@ -151,10 +214,12 @@ export default function DashboardPage() {
           <UpcomingSessionList
             sessions={upcomingPreview}
             RowComponent={UpcomingSessionRow}
+            onMarkCanceled={handleMarkCancel}
           ></UpcomingSessionList>
           {/* send corresponding session data and the RowComponent to list */}
         </ListPanel>
       </div>
+      {showMsg && <div className="toast-message">{msg}</div>}
       <div>
         <ListPanel title="Recent Activity" date="Latest updates and changes">
           <RecentActivityList
