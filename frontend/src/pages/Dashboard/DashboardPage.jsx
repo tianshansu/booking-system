@@ -68,27 +68,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleMarkComplete = async (sessionId) => {
-    try {
-      await updateSessionStatus(sessionId, SESSION_STATUS.COMPLETED);
-      showMessage("session successfully marked as completed");
-    } catch (err) {
-      console.error("Mark complete error:", err);
-      showMessage("session is unable to mark as completed, please try again");
-    }
-  };
-
-  const handleMarkCancel = async (sessionId) => {
-    try {
-      await updateSessionStatus(sessionId, SESSION_STATUS.CANCELED);
-      showMessage("session successfully marked as canceled");
-    } catch (err) {
-      console.error("Mark complete error:", err);
-      showMessage("session is unable to mark as canceled, please try again");
-    }
-  };
-
-  useEffect(() => {
+  // fetch sessions
+  const fetchSessions = () => {
     apiFetch("/api/dashboard/sessions")
       .then((r) => {
         if (!r) return;
@@ -100,7 +81,48 @@ export default function DashboardPage() {
         setUpcomingSessions(data.upcomingSessions);
       })
       .catch((e) => console.error("fetch failed:", e));
+  };
 
+  // fetch summary
+  const fetchSummary = () => {
+    apiFetch("/api/dashboard/summary")
+      .then((r) => {
+        if (!r) return;
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setSummary(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+  };
+
+  const handleMarkComplete = async (sessionId) => {
+    try {
+      await updateSessionStatus(sessionId, SESSION_STATUS.COMPLETED);
+      fetchSessions();
+      fetchSummary();
+      showMessage("session successfully marked as completed");
+    } catch (err) {
+      console.error("Mark complete error:", err);
+      showMessage("session is unable to mark as completed, please try again");
+    }
+  };
+
+  const handleMarkCancel = async (sessionId) => {
+    try {
+      await updateSessionStatus(sessionId, SESSION_STATUS.CANCELED);
+      fetchSessions();
+      fetchSummary();
+      showMessage("session successfully marked as canceled");
+    } catch (err) {
+      console.error("Mark complete error:", err);
+      showMessage("session is unable to mark as canceled, please try again");
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
     apiFetch("/api/dashboard")
       .then((r) => {
         if (!r) return;
@@ -112,16 +134,7 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("fetch failed:", e));
 
-    apiFetch("/api/dashboard/summary")
-      .then((r) => {
-        if (!r) return;
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setSummary(data);
-      })
-      .catch((e) => console.error("fetch failed:", e));
+    fetchSummary();
   }, []);
 
   return (
