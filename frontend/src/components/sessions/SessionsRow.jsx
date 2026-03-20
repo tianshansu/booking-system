@@ -7,7 +7,7 @@ export default function SessionsRow({ session, onEdit, onDelete }) {
         <input type="checkbox"></input>
       </td> */}
       <td className="sessions-row-cell">
-        <p>{session.title}</p>
+        <p>{session.name}</p>
       </td>
       <td className="sessions-row-cell">
         <p>{session.patientName}</p>

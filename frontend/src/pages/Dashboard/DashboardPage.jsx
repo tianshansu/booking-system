@@ -1,5 +1,6 @@
 import "./Dashboard.css";
 import "../../styles/popups.css";
+import "../../styles/form.css";
 import Card from "../../components/common/Card";
 import ListPanel from "../../components/common/ListPanel";
 import TodaySessionList from "../../components/dashboard/TodaySessionList";
@@ -8,6 +9,7 @@ import TodaySessionRow from "../../components/dashboard/TodaySessionRow";
 import UpcomingSessionRow from "../../components/dashboard/UpcomingSessionRow";
 import RecentActivityList from "../../components/dashboard/RecentActivityList";
 import RecentActivityListRow from "../../components/dashboard/RecentActivityListRow";
+import OverlayModal from "../../components/common/OverlayModal";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
@@ -36,6 +38,7 @@ export default function DashboardPage() {
   // pop-ups
   const [showMsg, setShowMsg] = useState(false);
   const [msg, setMsg] = useState("");
+  const [showAllTodaySessions, setShowAllTodaySessions] = useState(false);
 
   const showMessage = (text) => {
     setMsg(text);
@@ -190,9 +193,9 @@ export default function DashboardPage() {
                 color: "#2563EB",
                 fontSize: "16px",
               }}
-              onClick={() => alert("go to sessions page")}
+              onClick={() => setShowAllTodaySessions(true)}
             >
-              view all sessions
+              view all today's sessions
             </button>
           }
         >
@@ -232,7 +235,23 @@ export default function DashboardPage() {
           {/* send corresponding session data and the RowComponent to list */}
         </ListPanel>
       </div>
+
+      {/* pop ups & overlays */}
       {showMsg && <div className="toast-message">{msg}</div>}
+      {showAllTodaySessions && (
+        <OverlayModal
+          open={showAllTodaySessions}
+          title="Today's Sessions"
+          onClose={() => setShowAllTodaySessions(false)}
+        >
+          <TodaySessionList
+            sessions={todaySessions}
+            RowComponent={TodaySessionRow}
+            onMarkCompleted={handleMarkComplete}
+            onMarkCanceled={handleMarkCancel}
+          ></TodaySessionList>
+        </OverlayModal>
+      )}
       <div>
         <ListPanel title="Recent Activity" date="Latest updates and changes">
           <RecentActivityList

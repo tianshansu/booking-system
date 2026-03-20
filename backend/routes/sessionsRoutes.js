@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
       id: r.id,
-      title: r.name,
+      name: r.name,
       patientName: r.patient_name,
       patientId: r.patient_id,
       staff: r.staff_name,
