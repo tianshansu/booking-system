@@ -2,24 +2,32 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 
-router.get("/", (req, res) => {
-  res.json([
-    {
-      id: 1,
-      message: "Session completed with Michael Chen",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      message: "New session scheduled for Amanda Foster",
-      time: "5 hours ago",
-    },
-    {
-      id: 3,
-      message: "New person added - Amanda Foster",
-      time: "6 hours ago",
-    },
-  ]);
+// get 5 recent activities
+router.get("/recent-activities", async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        id,
+        message,
+        created_at
+      FROM recent_activity
+      ORDER BY created_at DESC
+      LIMIT 5;
+    `;
+
+    const { rows } = await pool.query(sql);
+
+    const mapActivities = (row) => ({
+      id: row.id,
+      message: row.message,
+      createdAt: row.created_at,
+    });
+
+    res.status(200).json(rows.map(mapActivities));
+  } catch (err) {
+    console.error("GET /dashboard/recent-activities error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 router.get("/summary", async (req, res) => {
@@ -95,7 +103,8 @@ router.get("/sessions", async (req, res) => {
       JOIN people patient ON s.patient_id = patient.id
       JOIN people staff ON s.staff_id = staff.id
       WHERE s.start_at::date = CURRENT_DATE 
-        AND s.status = 0;
+        AND s.status = 0
+      ORDER BY date, time ASC;
     `;
 
     const { rows: todayRows } = await pool.query(todaySql);
