@@ -823,3 +823,46 @@ active_people: number
 Errors:
 
 500: Database error
+
+## GET /api/dashboard/recent-activities
+
+Purpose:
+
+- Get the 5 most recent activity records from `recent_activity`.
+- Return frontend-friendly activity fields.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+[
+  {
+    "id": 1,
+    "message": "Session marked as completed",
+    "createdAt": "2026-03-20T03:30:00.000Z"
+  }
+]
+```
+
+Response fields:
+
+id: number
+
+message: string
+
+createdAt: timestamp string
+
+Errors:
+
+500: Internal server error

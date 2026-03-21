@@ -1,5 +1,6 @@
 import "./Dashboard.css";
 import "../../styles/popups.css";
+import "../../styles/form.css";
 import Card from "../../components/common/Card";
 import ListPanel from "../../components/common/ListPanel";
 import TodaySessionList from "../../components/dashboard/TodaySessionList";
@@ -8,6 +9,7 @@ import TodaySessionRow from "../../components/dashboard/TodaySessionRow";
 import UpcomingSessionRow from "../../components/dashboard/UpcomingSessionRow";
 import RecentActivityList from "../../components/dashboard/RecentActivityList";
 import RecentActivityListRow from "../../components/dashboard/RecentActivityListRow";
+import OverlayModal from "../../components/common/OverlayModal";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
@@ -36,6 +38,8 @@ export default function DashboardPage() {
   // pop-ups
   const [showMsg, setShowMsg] = useState(false);
   const [msg, setMsg] = useState("");
+  const [showAllTodaySessions, setShowAllTodaySessions] = useState(false);
+  const [showAllUpcomingSessions, setShowAllUpcomingSessions] = useState(false);
 
   const showMessage = (text) => {
     setMsg(text);
@@ -102,6 +106,7 @@ export default function DashboardPage() {
       await updateSessionStatus(sessionId, SESSION_STATUS.COMPLETED);
       fetchSessions();
       fetchSummary();
+      fetchRecentActivity();
       showMessage("session successfully marked as completed");
     } catch (err) {
       console.error("Mark complete error:", err);
@@ -114,6 +119,7 @@ export default function DashboardPage() {
       await updateSessionStatus(sessionId, SESSION_STATUS.CANCELED);
       fetchSessions();
       fetchSummary();
+      fetchRecentActivity();
       showMessage("session successfully marked as canceled");
     } catch (err) {
       console.error("Mark complete error:", err);
@@ -121,9 +127,9 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => {
-    fetchSessions();
-    apiFetch("/api/dashboard")
+  //fetch recent activities
+  const fetchRecentActivity = () => {
+    apiFetch("/api/dashboard/recent-activities")
       .then((r) => {
         if (!r) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -133,7 +139,12 @@ export default function DashboardPage() {
         setRecentActivities(data);
       })
       .catch((e) => console.error("fetch failed:", e));
+  };
 
+  // fetch page
+  useEffect(() => {
+    fetchSessions();
+    fetchRecentActivity();
     fetchSummary();
   }, []);
 
@@ -178,7 +189,7 @@ export default function DashboardPage() {
       >
         <ListPanel
           title="Today's Sessions"
-          date={todayDateFormat}
+          subtitle={todayDateFormat}
           footer={
             <button
               type="button"
@@ -190,9 +201,9 @@ export default function DashboardPage() {
                 color: "#2563EB",
                 fontSize: "16px",
               }}
-              onClick={() => alert("go to sessions page")}
+              onClick={() => setShowAllTodaySessions(true)}
             >
-              view all sessions
+              view all today's sessions
             </button>
           }
         >
@@ -206,7 +217,7 @@ export default function DashboardPage() {
         </ListPanel>
         <ListPanel
           title="Upcoming Sessions"
-          date="Next 7 days"
+          subtitle="Next 7 days"
           footer={
             <button
               type="button"
@@ -218,9 +229,9 @@ export default function DashboardPage() {
                 color: "#2563EB",
                 fontSize: "16px",
               }}
-              onClick={() => alert("go to calendar page")}
+              onClick={() => setShowAllUpcomingSessions(true)}
             >
-              view calendar
+              view sesisons in 7 days
             </button>
           }
         >
@@ -232,9 +243,42 @@ export default function DashboardPage() {
           {/* send corresponding session data and the RowComponent to list */}
         </ListPanel>
       </div>
+
+      {/* pop ups & overlays */}
       {showMsg && <div className="toast-message">{msg}</div>}
+      {showAllTodaySessions && (
+        <OverlayModal
+          open={showAllTodaySessions}
+          title="Today's Sessions"
+          onClose={() => setShowAllTodaySessions(false)}
+        >
+          <TodaySessionList
+            sessions={todaySessions}
+            RowComponent={TodaySessionRow}
+            onMarkCompleted={handleMarkComplete}
+            onMarkCanceled={handleMarkCancel}
+          ></TodaySessionList>
+        </OverlayModal>
+      )}
+      {showAllUpcomingSessions && (
+        <OverlayModal
+          open={showAllUpcomingSessions}
+          title="Upcoming Sessions"
+          onClose={() => setShowAllUpcomingSessions(false)}
+        >
+          <UpcomingSessionList
+            sessions={upcomingSessions}
+            RowComponent={UpcomingSessionRow}
+            onMarkCompleted={handleMarkComplete}
+            onMarkCanceled={handleMarkCancel}
+          ></UpcomingSessionList>
+        </OverlayModal>
+      )}
       <div>
-        <ListPanel title="Recent Activity" date="Latest updates and changes">
+        <ListPanel
+          title="Recent Activity"
+          subtitle="Latest updates and changes"
+        >
           <RecentActivityList
             activities={recentActivities}
             RowComponent={RecentActivityListRow}

@@ -95,7 +95,7 @@ export default function SessionsPage() {
     setEditingSessionId(session.id);
 
     setFormTitle("Edit A Session");
-    setSessionName(session.title);
+    setSessionName(session.name);
     setPatientId(session.patientId);
     setStaffId(session.staffId);
     setStatus(session.status);

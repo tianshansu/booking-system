@@ -2,6 +2,16 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 
+async function insertRecentActivity(type, message) {
+  await pool.query(
+    `
+    INSERT INTO recent_activity (type, message)
+    VALUES ($1, $2);
+  `,
+    [type, message],
+  );
+}
+
 // get patients
 router.get("/", async (req, res) => {
   try {
@@ -117,6 +127,8 @@ router.post("/add-patient", async (req, res) => {
     `;
     const result = await pool.query(sql, [name, email, phone, notes]);
 
+    await insertRecentActivity("person_created", `New person added - ${name}`);
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error("POST /people/add-patient error:", err);
@@ -178,7 +190,8 @@ router.put("/:id", async (req, res) => {
         email=$2,
         phone=$3,
         status=$4,
-        notes=$5
+        notes=$5,
+        updated_at = NOW()
       WHERE id=$6
       RETURNING id
     `;

@@ -3,6 +3,33 @@ const router = express.Router();
 const { pool } = require("../db");
 const { DateTime } = require("luxon");
 
+// helper function to insert activities
+async function insertRecentActivity(type, message) {
+  const sql = `
+    INSERT INTO recent_activity (type, message)
+    VALUES ($1, $2);
+  `;
+  await pool.query(sql, [type, message]);
+}
+
+async function logSessionStatusChange(oldStatus, newStatus, patientName) {
+  if (oldStatus === newStatus) return;
+
+  if (newStatus === 1) {
+    await insertRecentActivity(
+      "session_completed",
+      `Session completed with ${patientName}`,
+    );
+  }
+
+  if (newStatus === 2) {
+    await insertRecentActivity(
+      "session_canceled",
+      `Session canceled for ${patientName}`,
+    );
+  }
+}
+
 router.get("/", async (req, res) => {
   try {
     // get current page & limit from query
@@ -60,7 +87,7 @@ router.get("/", async (req, res) => {
 
     // add the remaining sql
     sql += `
-      ORDER BY s.start_at DESC
+      ORDER BY session_date, session_time ASC
       LIMIT $${index}
       OFFSET $${index + 1};
     `;
@@ -71,7 +98,7 @@ router.get("/", async (req, res) => {
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
       id: r.id,
-      title: r.name,
+      name: r.name,
       patientName: r.patient_name,
       patientId: r.patient_id,
       staff: r.staff_name,
@@ -178,6 +205,23 @@ router.post("/add-session", async (req, res) => {
       endAtWithZone,
     ]);
 
+    // get patient name
+    const { rows: patientRow } = await pool.query(
+      `
+      SELECT name
+      FROM people
+      WHERE id=$1;
+    `,
+      [parsedPatientId],
+    );
+
+    const patientName = patientRow[0].name;
+    // add this in recent actvities
+    await insertRecentActivity(
+      "session_created",
+      `New session scheduled for ${patientName}`,
+    );
+
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error("POST /sessions/add-session error:", err);
@@ -225,13 +269,31 @@ router.put("/:id", async (req, res) => {
     const startAtWithZone = melbourneStartAt.toISO();
     const endAtWithZone = melbourneEndAt.toISO();
 
-    if (!melbourneStartAt.isValid || !melbourneEndAt.isValid) {
-      return res.status(400).json({ error: "Invalid date/time format" });
+    const parsedStatus = Number(status);
+
+    if (![0, 1, 2].includes(parsedStatus)) {
+      return res.status(400).json({ error: "Invalid status" });
     }
+
+    // check old status
+    const checkOldStatusSql = `
+      SELECT s.status, patient.name AS patient_name
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      WHERE s.id=$1;
+    `;
+    const { rows: oldRows } = await pool.query(checkOldStatusSql, [sessionId]);
+
+    if (oldRows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const oldStatus = oldRows[0].status;
+    const patientName = oldRows[0].patient_name;
 
     const sql = `
       UPDATE sessions
-      SET name=$1, patient_id=$2, staff_id=$3, status=$4, start_at=$5, end_at=$6
+      SET name=$1, patient_id=$2, staff_id=$3, status=$4, start_at=$5, end_at=$6, updated_at = NOW()
       WHERE id=$7
       RETURNING *
     `;
@@ -240,11 +302,14 @@ router.put("/:id", async (req, res) => {
       sessionName,
       parsedPatientId,
       parsedStaffId,
-      status,
+      parsedStatus,
       startAtWithZone,
       endAtWithZone,
       sessionId,
     ]);
+
+    // add in recent activity
+    await logSessionStatusChange(oldStatus, parsedStatus, patientName);
 
     res.json(rows[0]);
   } catch (err) {
@@ -285,6 +350,22 @@ router.patch("/:id/status", async (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
 
+    // check old status
+    const checkOldStatusSql = `
+      SELECT s.status, patient.name AS patient_name
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      WHERE s.id=$1;
+    `;
+    const { rows: oldRows } = await pool.query(checkOldStatusSql, [sessionId]);
+
+    if (oldRows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const oldStatus = oldRows[0].status;
+    const patientName = oldRows[0].patient_name;
+
     const sql = `
       UPDATE sessions
       SET status = $1
@@ -293,6 +374,9 @@ router.patch("/:id/status", async (req, res) => {
     `;
 
     const { rows } = await pool.query(sql, [status, sessionId]);
+
+    // add in recent activity
+    await logSessionStatusChange(oldStatus, status, patientName);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: "Session not found" });
