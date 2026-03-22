@@ -1,0 +1,36 @@
+.filter-bar-item{
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    border: 1px solid #E5E7EB;
+}
+
+.filter-bar-item-icon{
+    width: 20px;
+}
+
+.filter-bar-item-left{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+}
+
+.filter-bar-item-right{
+    padding: 10px;
+    align-items: center;
+}
+
+.filter-bar-item-button{
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: gray;
+    padding: 10px;
+}
+
+.filter-bar-item-select{
+    padding: 10px;
+    background-color: #F9FAFB;
+    border: 1px solid #E5E7EB;
+}

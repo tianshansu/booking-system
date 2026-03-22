@@ -389,13 +389,14 @@ Errors:
 
 # Sessions
 
-## GET /api/sessions
+## GET /api/people
 
 Purpose:
 
-- Get a paginated list of sessions with patient/staff names (joined from `people`).
-- Support filtering by session status and staff.
-- Return frontend-friendly session fields.
+- Get a paginated list of people.
+- Support filtering by role and searching by name, email, or phone.
+- Return frontend-friendly people fields.
+- Return each person's last past session date.
 
 Auth:
 
@@ -403,10 +404,10 @@ Auth:
 
 Query params:
 
+- `role`: string, optional, default = `patient`
+- `search`: string, optional, default = `""`
 - `page`: number, optional, default = `1`
 - `limit`: number, optional, default = `5`
-- `status`: number, optional, session status filter
-- `staffId`: number, optional, staff id filter
 
 Request body:
 
@@ -419,17 +420,12 @@ Response 200:
   "data": [
     {
       "id": 1,
-      "title": "Regular Meet",
-      "patientName": "John Doe",
-      "patientId": 1,
-      "staff": "Dr Smith",
-      "staffId": 2,
-      "status": 0,
-      "date": "2024-01-15",
-      "time": "14:00",
-      "startAt": "2024-01-15T14:00",
-      "endAt": "2024-01-15T15:00",
-      "duration": "60m"
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "1234567890",
+      "status": "Active",
+      "lastSession": "2024-01-15",
+      "notes": "not come for sessions for a long time"
     }
   ],
   "page": 1,
@@ -445,27 +441,17 @@ data: array
 
 data[].id: number
 
-data[].title: string
+data[].name: string
 
-data[].patientName: string
+data[].email: string | null
 
-data[].patientId: number
+data[].phone: string | null
 
-data[].staff: string
+data[].status: "Active" | "Inactive"
 
-data[].staffId: number
+data[].lastSession: "YYYY-MM-DD" | null
 
-data[].status: number
-
-data[].date: "YYYY-MM-DD"
-
-data[].time: "HH:mm"
-
-data[].startAt: "YYYY-MM-DDTHH:mm"
-
-data[].endAt: "YYYY-MM-DDTHH:mm"
-
-data[].duration: string | null
+data[].notes: string | null
 
 page: number
 
@@ -476,6 +462,8 @@ total: number
 totalPages: number
 
 Errors:
+
+400: Invalid role
 
 500: Internal server error
 
