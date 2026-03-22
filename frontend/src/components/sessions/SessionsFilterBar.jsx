@@ -1,4 +1,4 @@
-import "./SessionsFilterBar.css";
+import "../../styles/filterbar.css";
 
 export default function SessionsFilterBar({
   onFilterStatus,
@@ -9,17 +9,17 @@ export default function SessionsFilterBar({
   onClear,
 }) {
   return (
-    <div className="sessions-filter-bar">
-      <div className="sessions-filter-bar-item">
-        <div className="sessions-filter-bar-item-left">
+    <div className="filter-bar">
+      <div className="filter-bar-item">
+        <div className="filter-bar-item-left">
           <img
             src="/icons/filter.svg"
-            className="sessions-filter-bar-item-icon"
+            className="filter-bar-item-icon"
             alt="filter"
           />
           <div>Filter by:</div>
           <select
-            className="sessions-filter-bar-item-select"
+            className="filter-bar-item-select"
             onChange={(e) => onFilterStatus(e.target.value)}
             value={filterStatus}
           >
@@ -30,7 +30,7 @@ export default function SessionsFilterBar({
           </select>
 
           <select
-            className="sessions-filter-bar-item-select"
+            className="filter-bar-item-select"
             onChange={(e) => onFilterStaff(e.target.value)}
             value={filterStaff}
           >
@@ -42,8 +42,8 @@ export default function SessionsFilterBar({
             ))}
           </select>
         </div>
-        <div className="sessions-filter-bar-item-right">
-          <button className="sessions-filter-bar-item-button" onClick={onClear}>
+        <div className="filter-bar-item-right">
+          <button className="filter-bar-item-button" onClick={onClear}>
             Clear filters
           </button>
         </div>

@@ -2,6 +2,7 @@ import "./PeoplePage.css";
 import "../../styles/form.css";
 import "../../styles/popups.css";
 import PeopleTable from "../../components/People/PeopleTable";
+import Searchbar from "../../components/common/Searchbar";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
@@ -17,24 +18,33 @@ export default function PeoplePage() {
   const [showMsg, setShowMsg] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // patient fields
+  // people fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState(0);
+  const [role, setRole] = useState("patient");
 
   const [formTitle, setFormTitle] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingPersonId, setEditingPersonId] = useState(null);
 
-  useEffect(() => {
-    fetchPatients();
-  }, [currentPage]);
+  // role tabs
+  const [roleTab, setRoleTab] = useState("patient");
 
-  // fetch patients
-  const fetchPatients = async () => {
-    apiFetch(`/api/people?limit=${limit}&page=${currentPage}`)
+  // search bar
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetchPeople();
+  }, [roleTab, currentPage, search]);
+
+  // fetch people
+  const fetchPeople = async () => {
+    apiFetch(
+      `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}`,
+    )
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -68,12 +78,13 @@ export default function PeoplePage() {
       });
     } else {
       // send req & get res
-      response = await apiFetch("/api/people/add-patient", {
+      response = await apiFetch("/api/people/add-person", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          role,
           name,
           email,
           phone,
@@ -87,16 +98,16 @@ export default function PeoplePage() {
     // set msg
     if (response.ok) {
       isEditMode
-        ? setMsg("Patient edited successfully")
-        : setMsg("Patient added successfully");
+        ? setMsg("Person edited successfully")
+        : setMsg("Person added successfully");
     } else {
       isEditMode
-        ? setMsg("Failed to edit patient")
-        : setMsg("Failed to add patient");
+        ? setMsg("Failed to edit person")
+        : setMsg("Failed to add person");
     }
 
     // refresh people list
-    await fetchPatients();
+    await fetchPeople();
 
     setShowMsg(true);
 
@@ -120,11 +131,14 @@ export default function PeoplePage() {
 
     // set msg
     if (response.ok) {
-      //setPeople((prev) => prev.filter((person) => person.id !== personId));
-      await fetchPatients();
-      setMsg("Patient deleted successfully");
+      await fetchPeople();
+      roleTab === "patient"
+        ? setMsg("Patient deleted successfully")
+        : setMsg("Staff deleted successfully");
     } else {
-      setMsg("Failed to delete patient");
+      roleTab === "patient"
+        ? setMsg("Failed to delete patient")
+        : setMsg("Failed to delete staff");
     }
     setShowMsg(true);
 
@@ -143,7 +157,7 @@ export default function PeoplePage() {
     setStatus(0);
     setNotes("");
 
-    setFormTitle("Add New Patient");
+    setFormTitle("Add New Person");
     setShowAddForm(true);
   };
 
@@ -157,14 +171,46 @@ export default function PeoplePage() {
     setStatus(person.status === "Active" ? 0 : 1);
     setNotes(person.notes);
 
-    setFormTitle("Edit Existing Patient");
+    setFormTitle("Edit Existing Person");
     setShowAddForm(true);
   };
 
   return (
     <div className="people">
       <div className="people-header">
-        <div>View and manage all people in the system.</div>
+        <div className="people-header-element">
+          View and manage all people in the system.
+          <div className="people-role-search">
+            {/* role selection - patient in default */}
+            <div className="people-role-tabs">
+              <button
+                type="button"
+                className={
+                  roleTab === "patient" ? "role-tab active" : "role-tab"
+                }
+                onClick={() => setRoleTab("patient")}
+              >
+                Patient
+              </button>
+              <button
+                type="button"
+                className={roleTab === "staff" ? "role-tab active" : "role-tab"}
+                onClick={() => setRoleTab("staff")}
+              >
+                Staff
+              </button>
+            </div>
+
+            <Searchbar
+              placeholder="Name, email or phone"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        </div>
 
         <div className="people-header-buttons">
           <button className="people-header-button" type="button">
@@ -257,6 +303,33 @@ export default function PeoplePage() {
                     </label>
                   </div>
                 )}
+                {!isEditMode && (
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">Role:</div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="role"
+                        value={"patient"}
+                        checked={role === "patient"}
+                        onChange={() => setRole("patient")}
+                      />
+                      Patient
+                    </label>
+
+                    <label>
+                      <input
+                        type="radio"
+                        name="role"
+                        value={"staff"}
+                        checked={role === "staff"}
+                        onChange={() => setRole("staff")}
+                      />
+                      Staff
+                    </label>
+                  </div>
+                )}
+
                 <div className="app-form-input-row">
                   <div className="app-form-input-row-label">Notes:</div>
                   <input

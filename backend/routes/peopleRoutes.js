@@ -15,10 +15,24 @@ async function insertRecentActivity(type, message) {
 // get patients
 router.get("/", async (req, res) => {
   try {
+    // get role
+    const role = req.query.role || "patient";
+
+    let roleValue;
+    if (role === "patient") {
+      roleValue = 0;
+    } else if (role === "staff") {
+      roleValue = 1;
+    } else {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // get search
+    const search = req.query.search || "";
+
     // get current page & limit from query
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
-
     const offset = (page - 1) * limit;
 
     // Get people + last past session date (only sessions before now)
@@ -35,14 +49,24 @@ router.get("/", async (req, res) => {
       LEFT JOIN sessions s
         ON s.patient_id = p.id
         AND s.start_at < NOW()
-      WHERE p.role = 0
+      WHERE p.role = $1
+        AND (
+          p.name ILIKE $2
+          OR p.email ILIKE $2
+          OR p.phone ILIKE $2
+        )
       GROUP BY p.id
       ORDER BY p.id
-      LIMIT $1
-      OFFSET $2;
+      LIMIT $3
+      OFFSET $4;
     `;
 
-    const { rows } = await pool.query(dataSql, [limit, offset]);
+    const { rows } = await pool.query(dataSql, [
+      roleValue,
+      `%${search}%`,
+      limit,
+      offset,
+    ]);
 
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
@@ -61,10 +85,15 @@ router.get("/", async (req, res) => {
     const countSql = `
       SELECT COUNT(*) AS total
       FROM people
-      WHERE role=0;
+      WHERE role=$1
+        AND (
+          name ILIKE $2
+          OR email ILIKE $2
+          OR phone ILIKE $2
+      );
     `;
 
-    const result = await pool.query(countSql);
+    const result = await pool.query(countSql, [roleValue, `%${search}%`]);
     const total = Number(result.rows[0].total);
     const totalPages = Math.ceil(total / limit);
 
@@ -109,29 +138,43 @@ router.get("/staff/options", async (req, res) => {
   }
 });
 
-// add patient
-router.post("/add-patient", async (req, res) => {
+// add person
+router.post("/add-person", async (req, res) => {
   try {
     // get values from req
-    const { name, email, phone, notes } = req.body;
+    const { role, name, email, phone, notes } = req.body;
+
+    if (role !== "patient" && role !== "staff") {
+      return res.status(400).json({ error: "Invalid role" });
+    }
 
     if (!name || !name.trim()) {
       return res.status(400).json({ error: "Name is required" });
     }
 
-    // add this people in db
+    // transfer role into number
+    let roleNum;
+    if (role === "patient") {
+      roleNum = 0;
+    } else if (role === "staff") {
+      roleNum = 1;
+    } else {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // add this person in db
     const sql = `
       INSERT INTO people (role, name, email, phone, status, notes)
-      VALUES (0, $1, $2, $3, 0, $4)
+      VALUES ($1, $2, $3, $4, 0, $5)
       RETURNING *;
     `;
-    const result = await pool.query(sql, [name, email, phone, notes]);
+    const result = await pool.query(sql, [roleNum, name, email, phone, notes]);
 
     await insertRecentActivity("person_created", `New person added - ${name}`);
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("POST /people/add-patient error:", err);
+    console.error("POST /people/add-person error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
