@@ -41,6 +41,9 @@ router.get("/", async (req, res) => {
     const status = req.query.status;
     const staffId = req.query.staffId;
 
+    // get search
+    const search = req.query.search || "";
+
     let sql = `
       SELECT
         s.id,
@@ -66,10 +69,16 @@ router.get("/", async (req, res) => {
       JOIN people patient ON s.patient_id = patient.id
       JOIN people staff   ON s.staff_id   = staff.id
       WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
     `;
 
     const values = [];
-    let index = 1;
+    values.push(`%${search}%`);
+    let index = 2;
 
     //put status into sql
     if (status !== undefined && status !== "") {
@@ -116,23 +125,31 @@ router.get("/", async (req, res) => {
     // count total data
     let countSql = `
       SELECT COUNT(*) AS total
-      FROM sessions
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
       WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
     `;
 
     const countValues = [];
-    let countIndex = 1;
+    countValues.push(`%${search}%`);
+    let countIndex = 2;
 
     //put status into sql
     if (status !== undefined && status !== "") {
-      countSql += ` AND status = $${countIndex}`;
+      countSql += ` AND s.status = $${countIndex}`;
       countValues.push(Number(status));
       countIndex++;
     }
 
     //put staffId into sql
     if (staffId !== undefined && staffId !== "") {
-      countSql += ` AND staff_id = $${countIndex};`;
+      countSql += ` AND s.staff_id = $${countIndex};`;
       countValues.push(Number(staffId));
       countIndex++;
     }
