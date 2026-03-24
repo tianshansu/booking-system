@@ -3,7 +3,7 @@ import "../../styles/form.css";
 import "../../styles/popups.css";
 import PeopleTable from "../../components/People/PeopleTable";
 import Searchbar from "../../components/common/Searchbar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
 export default function PeoplePage() {
@@ -36,12 +36,8 @@ export default function PeoplePage() {
   // search bar
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchPeople();
-  }, [roleTab, currentPage, search]);
-
   // fetch people
-  const fetchPeople = async () => {
+  const fetchPeople = useCallback(async () => {
     apiFetch(
       `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}`,
     )
@@ -55,13 +51,16 @@ export default function PeoplePage() {
         setTotalPages(data.totalPages);
       })
       .catch((e) => console.error("fetch failed:", e));
-  };
+  }, [currentPage, roleTab, search]);
+
+  useEffect(() => {
+    fetchPeople();
+  }, [fetchPeople]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     let response;
-
     if (isEditMode) {
       response = await apiFetch(`/api/people/${editingPersonId}`, {
         method: "PUT",

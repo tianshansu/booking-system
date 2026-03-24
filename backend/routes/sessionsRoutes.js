@@ -30,6 +30,129 @@ async function logSessionStatusChange(oldStatus, newStatus, patientName) {
   }
 }
 
+// export to csv
+router.get("/export", async (req, res) => {
+  try {
+    // filter
+    const status = req.query.status;
+    const staffId = req.query.staffId;
+
+    // get search
+    const search = req.query.search || "";
+
+    let sql = `
+      SELECT
+        s.id,
+        s.name,
+        s.status,
+        s.start_at,
+        s.end_at,
+        patient.id   AS patient_id,
+        patient.name AS patient_name,
+        staff.id     AS staff_id,
+        staff.name   AS staff_name,
+        CASE
+          WHEN s.status = 0 THEN 'Scheduled'
+          WHEN s.status = 1 THEN 'Completed'
+          WHEN s.status = 2 THEN 'Canceled'
+          ELSE 'Unknown'
+        END AS status_text,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'YYYY-MM-DD') AS session_date,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'HH24:MI') AS session_time,
+        to_char(
+          s.start_at AT TIME ZONE 'Australia/Melbourne',
+          'YYYY-MM-DD"T"HH24:MI'
+        ) AS start_at_local,
+        to_char(
+          s.end_at AT TIME ZONE 'Australia/Melbourne',
+          'YYYY-MM-DD"T"HH24:MI'
+        ) AS end_at_local,
+        ROUND(EXTRACT(EPOCH FROM (s.end_at - s.start_at)) / 60)::int AS duration_minutes
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
+      WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
+    `;
+
+    const values = [];
+    values.push(`%${search}%`);
+    let index = 2;
+
+    //put status into sql
+    if (status !== undefined && status !== "") {
+      sql += ` AND s.status = $${index}`;
+      values.push(Number(status));
+      index++;
+    }
+
+    //put staffId into sql
+    if (staffId !== undefined && staffId !== "") {
+      sql += ` AND s.staff_id = $${index}`;
+      values.push(Number(staffId));
+      index++;
+    }
+
+    // add the remaining sql
+    sql += `
+      ORDER BY s.start_at ASC;
+    `;
+
+    const { rows } = await pool.query(sql, values);
+
+    // create csv
+    function escapeCsv(value) {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    }
+
+    const header = [
+      "Session",
+      "Patient",
+      "Staff",
+      "Status",
+      "Date",
+      "Time",
+      "Duration (min)",
+    ];
+
+    const csvRows = [
+      header.join(","),
+      ...rows.map((row) =>
+        [
+          escapeCsv(row.name),
+          escapeCsv(row.patient_name),
+          escapeCsv(row.staff_name),
+          escapeCsv(row.status_text),
+          escapeCsv(row.session_date),
+          escapeCsv(row.session_time),
+          escapeCsv(row.duration_minutes),
+        ].join(","),
+      ),
+    ];
+
+    const csv = csvRows.join("\n");
+
+    const fileName = `sessions-${new Date().toISOString().slice(0, 10)}.csv`;
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.status(200).send(csv);
+  } catch (err) {
+    console.error("GET /sessions/export error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get session
 router.get("/", async (req, res) => {
   try {
     // get current page & limit from query
@@ -40,6 +163,9 @@ router.get("/", async (req, res) => {
     // filter
     const status = req.query.status;
     const staffId = req.query.staffId;
+
+    // get search
+    const search = req.query.search || "";
 
     let sql = `
       SELECT
@@ -66,10 +192,16 @@ router.get("/", async (req, res) => {
       JOIN people patient ON s.patient_id = patient.id
       JOIN people staff   ON s.staff_id   = staff.id
       WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
     `;
 
     const values = [];
-    let index = 1;
+    values.push(`%${search}%`);
+    let index = 2;
 
     //put status into sql
     if (status !== undefined && status !== "") {
@@ -116,23 +248,31 @@ router.get("/", async (req, res) => {
     // count total data
     let countSql = `
       SELECT COUNT(*) AS total
-      FROM sessions
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
       WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
     `;
 
     const countValues = [];
-    let countIndex = 1;
+    countValues.push(`%${search}%`);
+    let countIndex = 2;
 
     //put status into sql
     if (status !== undefined && status !== "") {
-      countSql += ` AND status = $${countIndex}`;
+      countSql += ` AND s.status = $${countIndex}`;
       countValues.push(Number(status));
       countIndex++;
     }
 
     //put staffId into sql
     if (staffId !== undefined && staffId !== "") {
-      countSql += ` AND staff_id = $${countIndex};`;
+      countSql += ` AND s.staff_id = $${countIndex};`;
       countValues.push(Number(staffId));
       countIndex++;
     }
