@@ -231,6 +231,84 @@ Errors:
 
 500: Internal server error
 
+## GET /api/people
+
+Purpose:
+
+- Get a paginated list of people.
+- Support filtering by role and searching by name, email, or phone.
+- Return frontend-friendly people fields.
+- Return each person's last past session date.
+
+Auth:
+
+- None
+
+Query params:
+
+- `role`: string, optional, default = `patient`
+- `search`: string, optional, default = `""`
+- `page`: number, optional, default = `1`
+- `limit`: number, optional, default = `5`
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "1234567890",
+      "status": "Active",
+      "lastSession": "2024-01-15",
+      "notes": "not come for sessions for a long time"
+    }
+  ],
+  "page": 1,
+  "limit": 5,
+  "total": 20,
+  "totalPages": 4
+}
+```
+
+Response fields:
+
+data: array
+
+data[].id: number
+
+data[].name: string
+
+data[].email: string | null
+
+data[].phone: string | null
+
+data[].status: "Active" | "Inactive"
+
+data[].lastSession: "YYYY-MM-DD" | null
+
+data[].notes: string | null
+
+page: number
+
+limit: number
+
+total: number
+
+totalPages: number
+
+Errors:
+
+400: Invalid role
+
+500: Internal server error
+
 ## POST /api/people/add-patient
 
 Purpose:
@@ -299,6 +377,75 @@ notes: string | null
 Errors:
 
 400: Name is required
+
+500: Internal server error
+
+## POST /api/people/import
+
+Purpose:
+
+- Import people records from an uploaded CSV file.
+- Support importing both patients and staff.
+- Set imported records to `status=0` (active) by default.
+- Return import summary including inserted and failed row counts.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+- `multipart/form-data`
+
+Form fields:
+
+- `file`: CSV file (required)
+
+CSV columns:
+
+- `name`: string (required)
+- `email`: string (required)
+- `phone`: string (optional)
+- `notes`: string (optional)
+- `role`: string (required) // `patient` or `staff`
+
+Response 200:
+
+```json
+{
+  "message": "Import completed",
+  "insertedCount": 2,
+  "failedCount": 1,
+  "failed": [
+    {
+      "row": 4,
+      "error": "Invalid role"
+    }
+  ]
+}
+```
+
+Response fields:
+
+message: string
+
+insertedCount: number
+
+failedCount: number
+
+failed: array
+
+failed[].row: number
+
+failed[].error: string
+
+Errors:
+
+400: No file uploaded
 
 500: Internal server error
 
@@ -389,14 +536,13 @@ Errors:
 
 # Sessions
 
-## GET /api/people
+## GET /api/sessions/export
 
 Purpose:
 
-- Get a paginated list of people.
-- Support filtering by role and searching by name, email, or phone.
-- Return frontend-friendly people fields.
-- Return each person's last past session date.
+- Export sessions to a CSV file.
+- Support filtering by search text, session status, and staff.
+- Return exported session data in CSV format.
 
 Auth:
 
@@ -404,10 +550,52 @@ Auth:
 
 Query params:
 
-- `role`: string, optional, default = `patient`
 - `search`: string, optional, default = `""`
+- `status`: number, optional, session status filter
+- `staffId`: number, optional, staff id filter
+
+Request body:
+
+- None
+
+Response 200:
+
+- File download: CSV
+
+CSV columns:
+
+- `Session`
+- `Patient`
+- `Staff`
+- `Status`
+- `Date`
+- `Time`
+- `Duration (min)`
+
+Errors:
+
+500: Internal server error
+
+## GET /api/sessions
+
+Purpose:
+
+- Get a paginated list of sessions with patient/staff names (joined from `people`).
+- Support searching by session name, patient name, or staff name.
+- Support filtering by session status and staff.
+- Return frontend-friendly session fields.
+
+Auth:
+
+- None
+
+Query params:
+
 - `page`: number, optional, default = `1`
 - `limit`: number, optional, default = `5`
+- `search`: string, optional, default = `""`
+- `status`: number, optional, session status filter
+- `staffId`: number, optional, staff id filter
 
 Request body:
 
@@ -420,12 +608,17 @@ Response 200:
   "data": [
     {
       "id": 1,
-      "name": "John Doe",
-      "email": "john.doe@example.com",
-      "phone": "1234567890",
-      "status": "Active",
-      "lastSession": "2024-01-15",
-      "notes": "not come for sessions for a long time"
+      "name": "Regular Meet",
+      "patientName": "John Doe",
+      "patientId": 1,
+      "staff": "Dr Smith",
+      "staffId": 2,
+      "status": 0,
+      "date": "2024-01-15",
+      "time": "14:00",
+      "startAt": "2024-01-15T14:00",
+      "endAt": "2024-01-15T15:00",
+      "duration": "60m"
     }
   ],
   "page": 1,
@@ -443,15 +636,25 @@ data[].id: number
 
 data[].name: string
 
-data[].email: string | null
+data[].patientName: string
 
-data[].phone: string | null
+data[].patientId: number
 
-data[].status: "Active" | "Inactive"
+data[].staff: string
 
-data[].lastSession: "YYYY-MM-DD" | null
+data[].staffId: number
 
-data[].notes: string | null
+data[].status: number
+
+data[].date: "YYYY-MM-DD"
+
+data[].time: "HH:mm"
+
+data[].startAt: "YYYY-MM-DDTHH:mm"
+
+data[].endAt: "YYYY-MM-DDTHH:mm"
+
+data[].duration: string | null
 
 page: number
 
@@ -462,8 +665,6 @@ total: number
 totalPages: number
 
 Errors:
-
-400: Invalid role
 
 500: Internal server error
 
