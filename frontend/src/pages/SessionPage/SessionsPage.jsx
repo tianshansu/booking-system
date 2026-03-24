@@ -53,29 +53,36 @@ export default function SessionsPage() {
       .catch((e) => console.error("fetch failed:", e));
   }, [currentPage, filterStatus, filterStaffId, search]);
 
-  useEffect(() => {
-    fetchSessions();
+  // export to csv
+  const handleExport = async () => {
+    let response = await apiFetch(
+      `/api/sessions/export?status=${filterStatus}&staffId=${filterStaffId}&search=${search}`,
+      {
+        method: "GET",
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
 
-    apiFetch("/api/people/patients/options")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setPatientsOptions(data);
-      })
-      .catch((e) => console.error("fetch failed:", e));
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
 
-    apiFetch("/api/people/staff/options")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setStaffOptions(data);
-      })
-      .catch((e) => console.error("fetch failed:", e));
-  }, [fetchSessions, search]);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sessions.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    setMsg("Sessions exported successfully");
+    setShowMsg(true);
+    setTimeout(() => {
+      setShowMsg(false);
+    }, 1000);
+  };
 
   // open add session form
   const openAddForm = () => {
@@ -203,6 +210,30 @@ export default function SessionsPage() {
     setFilterStaffId("");
   };
 
+  useEffect(() => {
+    fetchSessions();
+
+    apiFetch("/api/people/patients/options")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setPatientsOptions(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+
+    apiFetch("/api/people/staff/options")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setStaffOptions(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+  }, [fetchSessions, search]);
+
   return (
     <>
       <div className="sessions">
@@ -221,7 +252,11 @@ export default function SessionsPage() {
             </div>
           </div>
           <div className="sessions-header-buttons">
-            <button className="sessions-header-button" type="button">
+            <button
+              className="sessions-header-button"
+              type="button"
+              onClick={handleExport}
+            >
               <img
                 className="sessions-header-button-img"
                 src="/icons/import.svg"
