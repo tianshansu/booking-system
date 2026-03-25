@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
+const multer = require("multer");
+const { parse } = require("csv-parse/sync");
+const upload = multer({ storage: multer.memoryStorage() });
 
 async function insertRecentActivity(type, message) {
   await pool.query(
@@ -11,6 +14,90 @@ async function insertRecentActivity(type, message) {
     [type, message],
   );
 }
+
+// import people from csv
+router.post("/import", upload.single("file"), async (req, res) => {
+  try {
+    // check file
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // convert file buffer to text
+    const csvText = req.file.buffer.toString("utf-8");
+
+    // parse csv text into rows
+    const records = parse(csvText, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    });
+
+    const inserted = [];
+    const failed = [];
+
+    for (let i = 0; i < records.length; i++) {
+      const row = records[i];
+
+      const name = row.name?.trim();
+      const email = row.email?.trim();
+      const phone = row.phone?.trim() || "";
+      const notes = row.notes?.trim() || "";
+      const roleText = row.role?.trim().toLowerCase();
+
+      let roleValue;
+
+      if (roleText === "patient") {
+        roleValue = 0;
+      } else if (roleText === "staff") {
+        roleValue = 1;
+      } else {
+        failed.push({
+          row: i + 2,
+          error: "Invalid role",
+        });
+        continue;
+      }
+
+      // required field validation
+      if (!name || !email) {
+        failed.push({
+          row: i + 2,
+          error: "Name and email are required",
+        });
+        continue;
+      }
+
+      try {
+        const result = await pool.query(
+          `
+          INSERT INTO people (name, email, phone, notes, role, status)
+          VALUES ($1, $2, $3, $4, $5, 0)
+          RETURNING id, name, email;
+          `,
+          [name, email, phone, notes, roleValue],
+        );
+
+        inserted.push(result.rows[0]);
+      } catch (err) {
+        failed.push({
+          row: i + 2,
+          error: "Database insert failed",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      message: "Import completed",
+      insertedCount: inserted.length,
+      failedCount: failed.length,
+      failed,
+    });
+  } catch (err) {
+    console.error("POST /people/import error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // get patients
 router.get("/", async (req, res) => {

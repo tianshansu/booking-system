@@ -3,7 +3,7 @@ import "../../styles/form.css";
 import "../../styles/popups.css";
 import PeopleTable from "../../components/People/PeopleTable";
 import Searchbar from "../../components/common/Searchbar";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../api";
 
 export default function PeoplePage() {
@@ -35,6 +35,65 @@ export default function PeoplePage() {
 
   // search bar
   const [search, setSearch] = useState("");
+
+  // import people
+  const fileInputRef = useRef(null);
+
+  // open file picker
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // upload selected csv file
+  const handleImportFileChange = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("api/people/import", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Import failed");
+      }
+
+      setMsg(
+        `Import completed: ${data.insertedCount} inserted, ${data.failedCount} failed`,
+      );
+      setShowMsg(true);
+
+      setTimeout(() => {
+        setShowMsg(false);
+      }, 2000);
+
+      // refresh people list
+      fetchPeople();
+    } catch (err) {
+      console.error("Import people error:", err);
+      setMsg("Failed to import people");
+      setShowMsg(true);
+
+      setTimeout(() => {
+        setShowMsg(false);
+      }, 2000);
+    }
+
+    // clear input value so same file can be selected again
+    e.target.value = "";
+  };
 
   // fetch people
   const fetchPeople = useCallback(async () => {
@@ -212,7 +271,11 @@ export default function PeoplePage() {
         </div>
 
         <div className="people-header-buttons">
-          <button className="people-header-button" type="button">
+          <button
+            className="people-header-button"
+            type="button"
+            onClick={handleImportClick}
+          >
             <img
               className="people-header-button-img"
               src="/icons/import.svg"
@@ -220,6 +283,13 @@ export default function PeoplePage() {
             ></img>
             <div className="people-header-button-text">Import</div>
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            style={{ display: "none" }}
+            onChange={handleImportFileChange}
+          />
 
           <button
             className="people-header-button"
