@@ -3,6 +3,7 @@ import "../../styles/form.css";
 import "../../styles/popups.css";
 import PeopleTable from "../../components/People/PeopleTable";
 import Searchbar from "../../components/common/Searchbar";
+import DeleteConfirm from "../../components/common/DeleteConfirm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../api";
 
@@ -17,6 +18,7 @@ export default function PeoplePage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showMsg, setShowMsg] = useState(false);
   const [msg, setMsg] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // people fields
   const [name, setName] = useState("");
@@ -29,6 +31,7 @@ export default function PeoplePage() {
   const [formTitle, setFormTitle] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingPersonId, setEditingPersonId] = useState(null);
+  const [selectedPerson, setSelectedPerson] = useState(null);
 
   // role tabs
   const [roleTab, setRoleTab] = useState("patient");
@@ -93,6 +96,18 @@ export default function PeoplePage() {
 
     // clear input value so same file can be selected again
     e.target.value = "";
+  };
+
+  // handle delete confirm
+  const handleOpenDeleteConfirm = (person) => {
+    setSelectedPerson(person);
+    setShowDeleteConfirm(true);
+  };
+
+  // handle delete cancel
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setSelectedPerson(null);
   };
 
   // fetch people
@@ -179,9 +194,10 @@ export default function PeoplePage() {
     //show msg
   };
 
-  const handleDelete = async (personId) => {
+  const handleDelete = async () => {
+    if (!selectedPerson) return;
     // send req & get res
-    const response = await apiFetch(`/api/people/${personId}`, {
+    const response = await apiFetch(`/api/people/${selectedPerson.id}`, {
       method: "DELETE",
     });
 
@@ -193,10 +209,13 @@ export default function PeoplePage() {
       roleTab === "patient"
         ? setMsg("Patient deleted successfully")
         : setMsg("Staff deleted successfully");
+      setShowDeleteConfirm(false);
     } else {
       roleTab === "patient"
         ? setMsg("Failed to delete patient")
         : setMsg("Failed to delete staff");
+      setShowDeleteConfirm(false);
+      setSelectedPerson(null);
     }
     setShowMsg(true);
 
@@ -419,13 +438,20 @@ export default function PeoplePage() {
             </div>
           )}
           {showMsg && <div className="toast-message">{msg}</div>}
+          {showDeleteConfirm && (
+            <DeleteConfirm
+              text={`Are you sure you want to delete ${selectedPerson.name}? This will also delete all related sessions.`}
+              onCancel={handleCancelDelete}
+              onConfirm={handleDelete}
+            ></DeleteConfirm>
+          )}
         </div>
       </div>
 
       <PeopleTable
         className="people-table"
         people={people}
-        onDelete={handleDelete}
+        onDelete={handleOpenDeleteConfirm}
         onEdit={openEditForm}
         currentPage={currentPage}
         totalPages={totalPages}

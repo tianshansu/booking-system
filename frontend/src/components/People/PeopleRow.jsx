@@ -37,7 +37,7 @@ export default function PeopleRow({ person, onDelete, onEdit }) {
           type="button"
           className="people-row-action-button"
           style={{ color: "#DC2626" }}
-          onClick={() => onDelete(person.id)}
+          onClick={() => onDelete(person)}
         >
           Delete
         </button>

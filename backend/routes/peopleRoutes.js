@@ -266,37 +266,73 @@ router.post("/add-person", async (req, res) => {
   }
 });
 
-// delete patient
+// delete person
 router.delete("/:id", async (req, res) => {
+  const client = await pool.connect();
+
   try {
     // get person's id
-    const personId = req.params.id;
+    const personId = Number(req.params.id);
 
-    if (Number.isNaN(personId)) {
+    if (!Number.isInteger(personId)) {
       return res.status(400).json({ error: "Invalid person id" });
     }
 
-    const sql = `
-      DELETE
-      FROM people p
-      where p.id = $1
-      RETURNING id
-    `;
+    // start transaction
+    await client.query("BEGIN");
 
-    const { rows } = await pool.query(sql, [personId]);
+    // check if person exists
+    const personResult = await client.query(
+      `
+      SELECT id
+      FROM people
+      WHERE id = $1
+      `,
+      [personId],
+    );
 
     // if no data returned
-    if (rows.length === 0) {
+    if (personResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Person not found" });
     }
 
+    // delete related sessions first
+    await client.query(
+      `
+      DELETE
+      FROM sessions
+      WHERE patient_id = $1 OR staff_id = $1
+      `,
+      [personId],
+    );
+
+    // delete person
+    const deleteResult = await client.query(
+      `
+      DELETE
+      FROM people
+      WHERE id = $1
+      RETURNING id
+      `,
+      [personId],
+    );
+
+    // commit transaction
+    await client.query("COMMIT");
+
     res.status(200).json({
-      message: "Person deleted successfully",
-      deletedId: rows[0].id,
+      message: "Person and related sessions deleted successfully",
+      deletedId: deleteResult.rows[0].id,
     });
   } catch (err) {
+    // rollback transaction if error happens
+    await client.query("ROLLBACK");
     console.error("DELETE /people/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
+  } finally {
+    // release connection back to pool
+    client.release();
   }
 });
 
