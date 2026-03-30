@@ -1,6 +1,7 @@
 import "./SessionsPage.css";
 import "../../styles/form.css";
 import "../../styles/popups.css";
+import "../../styles/stateMsg.css";
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
 import Searchbar from "../../components/common/Searchbar";
@@ -38,20 +39,37 @@ export default function SessionsPage() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterStaffId, setFilterStaffId] = useState("");
 
+  // states
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const fetchSessions = useCallback(async () => {
-    apiFetch(
-      `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}&search=${search}`,
-    )
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setSessions(data.data || []);
-        setTotalPages(data.totalPages || 1);
-      })
-      .catch((e) => console.error("fetch failed:", e));
-  }, [currentPage, filterStatus, filterStaffId, search]);
+    try {
+      // set is loading
+      setLoading(true);
+      setError("");
+
+      const r = await apiFetch(
+        `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}&search=${search}`,
+      );
+
+      if (!r.ok) {
+        throw new Error(`HTTP ${r.status}`);
+      }
+
+      const data = await r.json();
+
+      setSessions(data.data || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (e) {
+      console.error("fetch failed:", e);
+      setError("Failed to load sessions.");
+      setSessions([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [limit, currentPage, filterStatus, filterStaffId, search]);
 
   // export to csv
   const handleExport = async () => {
@@ -205,9 +223,9 @@ export default function SessionsPage() {
 
   // filter clear
   const handleFilterClear = () => {
-    // reset filter
     setFilterStatus("");
     setFilterStaffId("");
+    setCurrentPage(1);
   };
 
   useEffect(() => {
@@ -232,7 +250,7 @@ export default function SessionsPage() {
         setStaffOptions(data);
       })
       .catch((e) => console.error("fetch failed:", e));
-  }, [fetchSessions, search]);
+  }, [fetchSessions]);
 
   return (
     <>
@@ -398,21 +416,35 @@ export default function SessionsPage() {
           </div>
         </div>
         <SessionsFilterBar
-          onFilterStatus={setFilterStatus}
+          onFilterStatus={(value) => {
+            setFilterStatus(value);
+            setCurrentPage(1);
+          }}
           filterStatus={filterStatus}
-          onFilterStaff={setFilterStaffId}
+          onFilterStaff={(value) => {
+            setFilterStaffId(value);
+            setCurrentPage(1);
+          }}
           filterStaff={filterStaffId}
           staffOptions={staffOptions}
           onClear={handleFilterClear}
         />
-        <SessionsTable
-          sessions={sessions}
-          onEdit={openEditForm}
-          setCurrentPage={setCurrentPage}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onDelete={handleDelete}
-        />
+        {loading ? (
+          <div className="state-message">Loading sessions...</div>
+        ) : error ? (
+          <div className="state-message state-error">{error}</div>
+        ) : sessions.length === 0 ? (
+          <div className="state-message">No sessions found.</div>
+        ) : (
+          <SessionsTable
+            sessions={sessions}
+            onEdit={openEditForm}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </>
   );

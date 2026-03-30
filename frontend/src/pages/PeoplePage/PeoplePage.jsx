@@ -1,6 +1,7 @@
 import "./PeoplePage.css";
 import "../../styles/form.css";
 import "../../styles/popups.css";
+import "../../styles/stateMsg.css";
 import PeopleTable from "../../components/People/PeopleTable";
 import Searchbar from "../../components/common/Searchbar";
 import DeleteConfirm from "../../components/common/DeleteConfirm";
@@ -38,6 +39,10 @@ export default function PeoplePage() {
 
   // search bar
   const [search, setSearch] = useState("");
+
+  // states
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // import people
   const fileInputRef = useRef(null);
@@ -112,19 +117,26 @@ export default function PeoplePage() {
 
   // fetch people
   const fetchPeople = useCallback(async () => {
-    apiFetch(
-      `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}`,
-    )
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setPeople(data.data);
-        setTotal(data.total);
-        setTotalPages(data.totalPages);
-      })
-      .catch((e) => console.error("fetch failed:", e));
+    try {
+      // set is loading
+      setLoading(true);
+      setError("");
+
+      const r = await apiFetch(
+        `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}`,
+      );
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+
+      // set data
+      setPeople(data.data);
+      setTotal(data.total);
+      setTotalPages(data.totalPages);
+    } catch (e) {
+      console.error("fetch failed:", e);
+    } finally {
+      setLoading(false);
+    }
   }, [currentPage, roleTab, search]);
 
   useEffect(() => {
@@ -448,15 +460,23 @@ export default function PeoplePage() {
         </div>
       </div>
 
-      <PeopleTable
-        className="people-table"
-        people={people}
-        onDelete={handleOpenDeleteConfirm}
-        onEdit={openEditForm}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        setCurrentPage={setCurrentPage}
-      ></PeopleTable>
+      {loading ? (
+        <div className="state-message">Loading people...</div>
+      ) : error ? (
+        <div className="state-message state-error">{error}</div>
+      ) : people.length === 0 ? (
+        <div className="state-message">No people found.</div>
+      ) : (
+        <PeopleTable
+          className="people-table"
+          people={people}
+          onDelete={handleOpenDeleteConfirm}
+          onEdit={openEditForm}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+        ></PeopleTable>
+      )}
     </div>
   );
 }
