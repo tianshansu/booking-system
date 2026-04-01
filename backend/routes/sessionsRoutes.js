@@ -163,6 +163,7 @@ router.get("/", async (req, res) => {
     // filter
     const status = req.query.status;
     const staffId = req.query.staffId;
+    const sortTime = req.query.sortTime === "asc" ? "ASC" : "DESC";
 
     // get search
     const search = req.query.search || "";
@@ -219,7 +220,7 @@ router.get("/", async (req, res) => {
 
     // add the remaining sql
     sql += `
-      ORDER BY session_date, session_time ASC
+      ORDER BY s.start_at ${sortTime}
       LIMIT $${index}
       OFFSET $${index + 1};
     `;
@@ -272,7 +273,7 @@ router.get("/", async (req, res) => {
 
     //put staffId into sql
     if (staffId !== undefined && staffId !== "") {
-      countSql += ` AND s.staff_id = $${countIndex};`;
+      countSql += ` AND s.staff_id = $${countIndex}`;
       countValues.push(Number(staffId));
       countIndex++;
     }

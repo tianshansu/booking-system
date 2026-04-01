@@ -38,6 +38,7 @@ export default function SessionsPage() {
   //filter
   const [filterStatus, setFilterStatus] = useState("");
   const [filterStaffId, setFilterStaffId] = useState("");
+  const [filterSortTime, setFilterSortTime] = useState("");
 
   // states
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ export default function SessionsPage() {
       setError("");
 
       const r = await apiFetch(
-        `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}&search=${search}`,
+        `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}&search=${search}&sortTime=${filterSortTime}`,
       );
 
       if (!r.ok) {
@@ -69,7 +70,7 @@ export default function SessionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [limit, currentPage, filterStatus, filterStaffId, search]);
+  }, [limit, currentPage, filterStatus, filterStaffId, search, filterSortTime]);
 
   // export to csv
   const handleExport = async () => {
@@ -226,6 +227,7 @@ export default function SessionsPage() {
     setFilterStatus("");
     setFilterStaffId("");
     setCurrentPage(1);
+    setFilterSortTime("");
   };
 
   useEffect(() => {
@@ -426,6 +428,8 @@ export default function SessionsPage() {
             setCurrentPage(1);
           }}
           filterStaff={filterStaffId}
+          onFilterSortTime={(value) => setFilterSortTime(value)}
+          filterSortTime={filterSortTime}
           staffOptions={staffOptions}
           onClear={handleFilterClear}
         />

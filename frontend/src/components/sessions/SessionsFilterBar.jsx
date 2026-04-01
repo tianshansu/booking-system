@@ -5,6 +5,8 @@ export default function SessionsFilterBar({
   filterStatus,
   onFilterStaff,
   filterStaff,
+  onFilterSortTime,
+  filterSortTime,
   staffOptions,
   onClear,
 }) {
@@ -40,6 +42,18 @@ export default function SessionsFilterBar({
                 {staff.name}
               </option>
             ))}
+          </select>
+
+          {/* sorting */}
+          <div>Sort by:</div>
+          <select
+            className="filter-bar-item-select"
+            onChange={(e) => onFilterSortTime(e.target.value)}
+            value={filterSortTime}
+          >
+            <option value="">Default</option>
+            <option value="desc">Newest first</option>
+            <option value="asc">Oldest first</option>
           </select>
         </div>
         <div className="filter-bar-item-right">

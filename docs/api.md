@@ -583,6 +583,7 @@ Purpose:
 - Get a paginated list of sessions with patient/staff names (joined from `people`).
 - Support searching by session name, patient name, or staff name.
 - Support filtering by session status and staff.
+- Support sorting by session start time.
 - Return frontend-friendly session fields.
 
 Auth:
@@ -596,6 +597,9 @@ Query params:
 - `search`: string, optional, default = `""`
 - `status`: number, optional, session status filter
 - `staffId`: number, optional, staff id filter
+- `sortTime`: string, optional, sort by session start time:
+  - `asc` = ascending
+  - any other value or omitted = descending
 
 Request body:
 
