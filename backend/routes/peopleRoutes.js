@@ -99,11 +99,15 @@ router.post("/import", upload.single("file"), async (req, res) => {
   }
 });
 
-// get patients
+// get people
 router.get("/", async (req, res) => {
   try {
     // get role
     const role = req.query.role || "patient";
+
+    // get filter values
+    const filterStatus = req.query.filterStatus;
+    const filterName = req.query.filterName === "desc" ? "DESC" : "ASC";
 
     let roleValue;
     if (role === "patient") {
@@ -123,7 +127,7 @@ router.get("/", async (req, res) => {
     const offset = (page - 1) * limit;
 
     // Get people + last past session date (only sessions before now)
-    const dataSql = `
+    let dataSql = `
       SELECT
         p.id,
         p.name,
@@ -142,8 +146,15 @@ router.get("/", async (req, res) => {
           OR p.email ILIKE $2
           OR p.phone ILIKE $2
         )
+    `;
+
+    if (filterStatus !== undefined && filterStatus !== "") {
+      dataSql += ` AND p.status = ${Number(filterStatus)}`;
+    }
+
+    dataSql += `
       GROUP BY p.id
-      ORDER BY p.id
+      ORDER BY p.name ${filterName}
       LIMIT $3
       OFFSET $4;
     `;
@@ -169,7 +180,7 @@ router.get("/", async (req, res) => {
     }));
 
     // count total data
-    const countSql = `
+    let countSql = `
       SELECT COUNT(*) AS total
       FROM people
       WHERE role=$1
@@ -177,8 +188,12 @@ router.get("/", async (req, res) => {
           name ILIKE $2
           OR email ILIKE $2
           OR phone ILIKE $2
-      );
+      )
     `;
+
+    if (filterStatus !== undefined && filterStatus !== "") {
+      countSql += ` AND status = ${Number(filterStatus)};`;
+    }
 
     const result = await pool.query(countSql, [roleValue, `%${search}%`]);
     const total = Number(result.rows[0].total);

@@ -237,6 +237,8 @@ Purpose:
 
 - Get a paginated list of people.
 - Support filtering by role and searching by name, email, or phone.
+- Support filtering by person status.
+- Support sorting by person name.
 - Return frontend-friendly people fields.
 - Return each person's last past session date.
 
@@ -250,6 +252,10 @@ Query params:
 - `search`: string, optional, default = `""`
 - `page`: number, optional, default = `1`
 - `limit`: number, optional, default = `5`
+- `filterStatus`: number, optional, people status filter
+- `filterName`: string, optional, sort by name:
+  - `desc` = descending
+  - any other value or omitted = ascending
 
 Request body:
 
