@@ -237,6 +237,8 @@ Purpose:
 
 - Get a paginated list of people.
 - Support filtering by role and searching by name, email, or phone.
+- Support filtering by person status.
+- Support sorting by person name.
 - Return frontend-friendly people fields.
 - Return each person's last past session date.
 
@@ -250,6 +252,10 @@ Query params:
 - `search`: string, optional, default = `""`
 - `page`: number, optional, default = `1`
 - `limit`: number, optional, default = `5`
+- `filterStatus`: number, optional, people status filter
+- `filterName`: string, optional, sort by name:
+  - `desc` = descending
+  - any other value or omitted = ascending
 
 Request body:
 
@@ -583,6 +589,7 @@ Purpose:
 - Get a paginated list of sessions with patient/staff names (joined from `people`).
 - Support searching by session name, patient name, or staff name.
 - Support filtering by session status and staff.
+- Support sorting by session start time.
 - Return frontend-friendly session fields.
 
 Auth:
@@ -596,6 +603,9 @@ Query params:
 - `search`: string, optional, default = `""`
 - `status`: number, optional, session status filter
 - `staffId`: number, optional, staff id filter
+- `sortTime`: string, optional, sort by session start time:
+  - `asc` = ascending
+  - any other value or omitted = descending
 
 Request body:
 

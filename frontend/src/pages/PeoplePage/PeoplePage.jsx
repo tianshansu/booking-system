@@ -7,6 +7,7 @@ import Searchbar from "../../components/common/Searchbar";
 import DeleteConfirm from "../../components/common/DeleteConfirm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../api";
+import PeopleFilterBar from "../../components/People/PeopleFilterBar";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
@@ -43,6 +44,10 @@ export default function PeoplePage() {
   // states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // filter
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterName, setFilterName] = useState("");
 
   // import people
   const fileInputRef = useRef(null);
@@ -115,6 +120,13 @@ export default function PeoplePage() {
     setSelectedPerson(null);
   };
 
+  // filter clear
+  const handleFilterClear = () => {
+    setFilterStatus("");
+    setCurrentPage(1);
+    setFilterName("");
+  };
+
   // fetch people
   const fetchPeople = useCallback(async () => {
     try {
@@ -123,7 +135,7 @@ export default function PeoplePage() {
       setError("");
 
       const r = await apiFetch(
-        `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}`,
+        `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}&filterStatus=${filterStatus}&filterName=${filterName}`,
       );
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
@@ -137,7 +149,7 @@ export default function PeoplePage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, roleTab, search]);
+  }, [currentPage, roleTab, search, filterStatus, filterName]);
 
   useEffect(() => {
     fetchPeople();
@@ -459,6 +471,20 @@ export default function PeoplePage() {
           )}
         </div>
       </div>
+
+      <PeopleFilterBar
+        onFilterStatus={(value) => {
+          setFilterStatus(value);
+          setCurrentPage(1);
+        }}
+        filterStatus={filterStatus}
+        onFilterName={(value) => {
+          setFilterName(value);
+          setCurrentPage(1);
+        }}
+        filterName={filterName}
+        onClear={handleFilterClear}
+      ></PeopleFilterBar>
 
       {loading ? (
         <div className="state-message">Loading people...</div>
