@@ -486,6 +486,57 @@ Response 200:
 }
 ```
 
+## DELETE /api/people/bulk-delete
+
+Purpose:
+
+- Delete multiple people by ids.
+- Delete related sessions first.
+- Use a transaction to ensure all deletions succeed or fail together.
+
+Auth:
+
+- None
+
+Query params:
+
+- None
+
+Request body:
+
+```json
+{
+  "ids": [1, 2, 3]
+}
+```
+
+Request body fields:
+
+ids: number[] (required)
+
+Response 200:
+
+```json
+{
+  "message": "People deleted successfully",
+  "deletedIds": [1, 2, 3]
+}
+```
+
+Response fields:
+
+message: string
+
+deletedIds: number[]
+
+Errors:
+
+400: ids is required
+
+404: Some people not found
+
+500: Failed to delete people
+
 ## PUT /api/people/:id
 
 Purpose:

@@ -14,9 +14,9 @@ export default function PeopleTable({
       <table className="people-table-table">
         <thead>
           <tr>
-            {/* <th scope="col" className="people-table-table-header">
+            <th scope="col" className="people-table-table-header">
               <input type="checkbox"></input>
-            </th> */}
+            </th>
             <th scope="col" className="people-table-table-header">
               NAME
             </th>

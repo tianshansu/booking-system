@@ -351,7 +351,72 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// edit patient
+// bulk delete
+router.delete("/bulk-delete", async (req, res) => {
+  //get people's ids
+  const { ids } = req.body;
+  const client = await pool.connect();
+
+  try {
+    // validate ids
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "ids is required" });
+    }
+
+    await client.query("BEGIN");
+
+    // check if all people exist
+    const peopleResult = await client.query(
+      `
+      SELECT id
+      FROM people
+      WHERE id = ANY($1)
+      `,
+      [ids],
+    );
+
+    if (peopleResult.rows.length !== ids.length) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Some people not found" });
+    }
+
+    // delete related sessions first
+    await client.query(
+      `
+      DELETE
+      FROM sessions
+      WHERE patient_id = ANY($1) OR staff_id = ANY($1)
+      `,
+      [ids],
+    );
+
+    // delete people
+    const deleteResult = await client.query(
+      `
+      DELETE
+      FROM people
+      WHERE id = ANY($1)
+      RETURNING id
+      `,
+      [ids],
+    );
+
+    await client.query("COMMIT");
+
+    return res.json({
+      message: "People deleted successfully",
+      deletedIds: deleteResult.rows.map((row) => row.id),
+    });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("DELETE /people/bulk-delete error:", err);
+    return res.status(500).json({ error: "Failed to delete people" });
+  } finally {
+    client.release();
+  }
+});
+
+// edit person
 router.put("/:id", async (req, res) => {
   try {
     // get person id from params
