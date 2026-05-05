@@ -3,9 +3,9 @@ import "./PeopleRow.css";
 export default function PeopleRow({ person, onDelete, onEdit }) {
   return (
     <tr className="people-row">
-      <td className="people-row-cell people-row-checkbox">
+      {/* <td className="people-row-cell people-row-checkbox">
         <input type="checkbox"></input>
-      </td>
+      </td> */}
       <td className="people-row-cell people-row-name">
         <p>{person.name}</p>
       </td>
@@ -37,7 +37,7 @@ export default function PeopleRow({ person, onDelete, onEdit }) {
           type="button"
           className="people-row-action-button"
           style={{ color: "#DC2626" }}
-          onClick={() => onDelete(person.id)}
+          onClick={() => onDelete(person)}
         >
           Delete
         </button>

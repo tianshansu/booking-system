@@ -11,6 +11,11 @@
   width: 100%;
 }
 
+.people-header-element{
+  display: grid;
+  gap: 10px;
+}
+
 .people-header-buttons {
   display: flex;
   gap: 10px;
@@ -27,4 +32,49 @@
   padding: 14px;
   height: 40px;
   cursor: pointer;
+}
+
+.people-role-tabs {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.people-role-search{
+  display: flex;
+  gap: 10px;
+}
+
+.role-tab {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  padding: 8px 18px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.role-tab:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.role-tab:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.role-tab + .role-tab {
+  border-left: none;
+}
+
+.role-tab.active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+.role-tab:hover:not(.active) {
+  background: #f9fafb;
 }

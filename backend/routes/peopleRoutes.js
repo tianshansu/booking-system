@@ -1,18 +1,133 @@
 const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
+const multer = require("multer");
+const { parse } = require("csv-parse/sync");
+const upload = multer({ storage: multer.memoryStorage() });
 
-// get patients
+async function insertRecentActivity(type, message) {
+  await pool.query(
+    `
+    INSERT INTO recent_activity (type, message)
+    VALUES ($1, $2);
+  `,
+    [type, message],
+  );
+}
+
+// import people from csv
+router.post("/import", upload.single("file"), async (req, res) => {
+  try {
+    // check file
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // convert file buffer to text
+    const csvText = req.file.buffer.toString("utf-8");
+
+    // parse csv text into rows
+    const records = parse(csvText, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    });
+
+    const inserted = [];
+    const failed = [];
+
+    for (let i = 0; i < records.length; i++) {
+      const row = records[i];
+
+      const name = row.name?.trim();
+      const email = row.email?.trim();
+      const phone = row.phone?.trim() || "";
+      const notes = row.notes?.trim() || "";
+      const roleText = row.role?.trim().toLowerCase();
+
+      let roleValue;
+
+      if (roleText === "patient") {
+        roleValue = 0;
+      } else if (roleText === "staff") {
+        roleValue = 1;
+      } else {
+        failed.push({
+          row: i + 2,
+          error: "Invalid role",
+        });
+        continue;
+      }
+
+      // required field validation
+      if (!name || !email) {
+        failed.push({
+          row: i + 2,
+          error: "Name and email are required",
+        });
+        continue;
+      }
+
+      try {
+        const result = await pool.query(
+          `
+          INSERT INTO people (name, email, phone, notes, role, status)
+          VALUES ($1, $2, $3, $4, $5, 0)
+          RETURNING id, name, email;
+          `,
+          [name, email, phone, notes, roleValue],
+        );
+
+        inserted.push(result.rows[0]);
+      } catch (err) {
+        failed.push({
+          row: i + 2,
+          error: "Database insert failed",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      message: "Import completed",
+      insertedCount: inserted.length,
+      failedCount: failed.length,
+      failed,
+    });
+  } catch (err) {
+    console.error("POST /people/import error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get people
 router.get("/", async (req, res) => {
   try {
+    // get role
+    const role = req.query.role || "patient";
+
+    // get filter values
+    const filterStatus = req.query.filterStatus;
+    const filterName = req.query.filterName === "desc" ? "DESC" : "ASC";
+
+    let roleValue;
+    if (role === "patient") {
+      roleValue = 0;
+    } else if (role === "staff") {
+      roleValue = 1;
+    } else {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // get search
+    const search = req.query.search || "";
+
     // get current page & limit from query
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
-
     const offset = (page - 1) * limit;
 
     // Get people + last past session date (only sessions before now)
-    const dataSql = `
+    let dataSql = `
       SELECT
         p.id,
         p.name,
@@ -25,14 +140,31 @@ router.get("/", async (req, res) => {
       LEFT JOIN sessions s
         ON s.patient_id = p.id
         AND s.start_at < NOW()
-      WHERE p.role = 0
-      GROUP BY p.id
-      ORDER BY p.id
-      LIMIT $1
-      OFFSET $2;
+      WHERE p.role = $1
+        AND (
+          p.name ILIKE $2
+          OR p.email ILIKE $2
+          OR p.phone ILIKE $2
+        )
     `;
 
-    const { rows } = await pool.query(dataSql, [limit, offset]);
+    if (filterStatus !== undefined && filterStatus !== "") {
+      dataSql += ` AND p.status = ${Number(filterStatus)}`;
+    }
+
+    dataSql += `
+      GROUP BY p.id
+      ORDER BY p.name ${filterName}
+      LIMIT $3
+      OFFSET $4;
+    `;
+
+    const { rows } = await pool.query(dataSql, [
+      roleValue,
+      `%${search}%`,
+      limit,
+      offset,
+    ]);
 
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
@@ -48,13 +180,22 @@ router.get("/", async (req, res) => {
     }));
 
     // count total data
-    const countSql = `
+    let countSql = `
       SELECT COUNT(*) AS total
       FROM people
-      WHERE role=0;
+      WHERE role=$1
+        AND (
+          name ILIKE $2
+          OR email ILIKE $2
+          OR phone ILIKE $2
+      )
     `;
 
-    const result = await pool.query(countSql);
+    if (filterStatus !== undefined && filterStatus !== "") {
+      countSql += ` AND status = ${Number(filterStatus)};`;
+    }
+
+    const result = await pool.query(countSql, [roleValue, `%${search}%`]);
     const total = Number(result.rows[0].total);
     const totalPages = Math.ceil(total / limit);
 
@@ -99,62 +240,114 @@ router.get("/staff/options", async (req, res) => {
   }
 });
 
-// add patient
-router.post("/add-patient", async (req, res) => {
+// add person
+router.post("/add-person", async (req, res) => {
   try {
     // get values from req
-    const { name, email, phone, notes } = req.body;
+    const { role, name, email, phone, notes } = req.body;
+
+    if (role !== "patient" && role !== "staff") {
+      return res.status(400).json({ error: "Invalid role" });
+    }
 
     if (!name || !name.trim()) {
       return res.status(400).json({ error: "Name is required" });
     }
 
-    // add this people in db
+    // transfer role into number
+    let roleNum;
+    if (role === "patient") {
+      roleNum = 0;
+    } else if (role === "staff") {
+      roleNum = 1;
+    } else {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // add this person in db
     const sql = `
       INSERT INTO people (role, name, email, phone, status, notes)
-      VALUES (0, $1, $2, $3, 0, $4)
+      VALUES ($1, $2, $3, $4, 0, $5)
       RETURNING *;
     `;
-    const result = await pool.query(sql, [name, email, phone, notes]);
+    const result = await pool.query(sql, [roleNum, name, email, phone, notes]);
+
+    await insertRecentActivity("person_created", `New person added - ${name}`);
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("POST /people/add-patient error:", err);
+    console.error("POST /people/add-person error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// delete patient
+// delete person
 router.delete("/:id", async (req, res) => {
+  const client = await pool.connect();
+
   try {
     // get person's id
-    const personId = req.params.id;
+    const personId = Number(req.params.id);
 
-    if (Number.isNaN(personId)) {
+    if (!Number.isInteger(personId)) {
       return res.status(400).json({ error: "Invalid person id" });
     }
 
-    const sql = `
-      DELETE
-      FROM people p
-      where p.id = $1
-      RETURNING id
-    `;
+    // start transaction
+    await client.query("BEGIN");
 
-    const { rows } = await pool.query(sql, [personId]);
+    // check if person exists
+    const personResult = await client.query(
+      `
+      SELECT id
+      FROM people
+      WHERE id = $1
+      `,
+      [personId],
+    );
 
     // if no data returned
-    if (rows.length === 0) {
+    if (personResult.rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Person not found" });
     }
 
+    // delete related sessions first
+    await client.query(
+      `
+      DELETE
+      FROM sessions
+      WHERE patient_id = $1 OR staff_id = $1
+      `,
+      [personId],
+    );
+
+    // delete person
+    const deleteResult = await client.query(
+      `
+      DELETE
+      FROM people
+      WHERE id = $1
+      RETURNING id
+      `,
+      [personId],
+    );
+
+    // commit transaction
+    await client.query("COMMIT");
+
     res.status(200).json({
-      message: "Person deleted successfully",
-      deletedId: rows[0].id,
+      message: "Person and related sessions deleted successfully",
+      deletedId: deleteResult.rows[0].id,
     });
   } catch (err) {
+    // rollback transaction if error happens
+    await client.query("ROLLBACK");
     console.error("DELETE /people/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
+  } finally {
+    // release connection back to pool
+    client.release();
   }
 });
 
@@ -178,7 +371,8 @@ router.put("/:id", async (req, res) => {
         email=$2,
         phone=$3,
         status=$4,
-        notes=$5
+        notes=$5,
+        updated_at = NOW()
       WHERE id=$6
       RETURNING id
     `;

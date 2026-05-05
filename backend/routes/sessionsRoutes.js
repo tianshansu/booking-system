@@ -3,6 +3,156 @@ const router = express.Router();
 const { pool } = require("../db");
 const { DateTime } = require("luxon");
 
+// helper function to insert activities
+async function insertRecentActivity(type, message) {
+  const sql = `
+    INSERT INTO recent_activity (type, message)
+    VALUES ($1, $2);
+  `;
+  await pool.query(sql, [type, message]);
+}
+
+async function logSessionStatusChange(oldStatus, newStatus, patientName) {
+  if (oldStatus === newStatus) return;
+
+  if (newStatus === 1) {
+    await insertRecentActivity(
+      "session_completed",
+      `Session completed with ${patientName}`,
+    );
+  }
+
+  if (newStatus === 2) {
+    await insertRecentActivity(
+      "session_canceled",
+      `Session canceled for ${patientName}`,
+    );
+  }
+}
+
+// export to csv
+router.get("/export", async (req, res) => {
+  try {
+    // filter
+    const status = req.query.status;
+    const staffId = req.query.staffId;
+
+    // get search
+    const search = req.query.search || "";
+
+    let sql = `
+      SELECT
+        s.id,
+        s.name,
+        s.status,
+        s.start_at,
+        s.end_at,
+        patient.id   AS patient_id,
+        patient.name AS patient_name,
+        staff.id     AS staff_id,
+        staff.name   AS staff_name,
+        CASE
+          WHEN s.status = 0 THEN 'Scheduled'
+          WHEN s.status = 1 THEN 'Completed'
+          WHEN s.status = 2 THEN 'Canceled'
+          ELSE 'Unknown'
+        END AS status_text,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'YYYY-MM-DD') AS session_date,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'HH24:MI') AS session_time,
+        to_char(
+          s.start_at AT TIME ZONE 'Australia/Melbourne',
+          'YYYY-MM-DD"T"HH24:MI'
+        ) AS start_at_local,
+        to_char(
+          s.end_at AT TIME ZONE 'Australia/Melbourne',
+          'YYYY-MM-DD"T"HH24:MI'
+        ) AS end_at_local,
+        ROUND(EXTRACT(EPOCH FROM (s.end_at - s.start_at)) / 60)::int AS duration_minutes
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
+      WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
+    `;
+
+    const values = [];
+    values.push(`%${search}%`);
+    let index = 2;
+
+    //put status into sql
+    if (status !== undefined && status !== "") {
+      sql += ` AND s.status = $${index}`;
+      values.push(Number(status));
+      index++;
+    }
+
+    //put staffId into sql
+    if (staffId !== undefined && staffId !== "") {
+      sql += ` AND s.staff_id = $${index}`;
+      values.push(Number(staffId));
+      index++;
+    }
+
+    // add the remaining sql
+    sql += `
+      ORDER BY s.start_at ASC;
+    `;
+
+    const { rows } = await pool.query(sql, values);
+
+    // create csv
+    function escapeCsv(value) {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    }
+
+    const header = [
+      "Session",
+      "Patient",
+      "Staff",
+      "Status",
+      "Date",
+      "Time",
+      "Duration (min)",
+    ];
+
+    const csvRows = [
+      header.join(","),
+      ...rows.map((row) =>
+        [
+          escapeCsv(row.name),
+          escapeCsv(row.patient_name),
+          escapeCsv(row.staff_name),
+          escapeCsv(row.status_text),
+          escapeCsv(row.session_date),
+          escapeCsv(row.session_time),
+          escapeCsv(row.duration_minutes),
+        ].join(","),
+      ),
+    ];
+
+    const csv = csvRows.join("\n");
+
+    const fileName = `sessions-${new Date().toISOString().slice(0, 10)}.csv`;
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.status(200).send(csv);
+  } catch (err) {
+    console.error("GET /sessions/export error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get session
 router.get("/", async (req, res) => {
   try {
     // get current page & limit from query
@@ -13,6 +163,10 @@ router.get("/", async (req, res) => {
     // filter
     const status = req.query.status;
     const staffId = req.query.staffId;
+    const sortTime = req.query.sortTime === "asc" ? "ASC" : "DESC";
+
+    // get search
+    const search = req.query.search || "";
 
     let sql = `
       SELECT
@@ -39,10 +193,16 @@ router.get("/", async (req, res) => {
       JOIN people patient ON s.patient_id = patient.id
       JOIN people staff   ON s.staff_id   = staff.id
       WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
     `;
 
     const values = [];
-    let index = 1;
+    values.push(`%${search}%`);
+    let index = 2;
 
     //put status into sql
     if (status !== undefined && status !== "") {
@@ -60,7 +220,7 @@ router.get("/", async (req, res) => {
 
     // add the remaining sql
     sql += `
-      ORDER BY s.start_at DESC
+      ORDER BY s.start_at ${sortTime}
       LIMIT $${index}
       OFFSET $${index + 1};
     `;
@@ -71,7 +231,7 @@ router.get("/", async (req, res) => {
     // Convert DB fields -> frontend-friendly fields
     const data = rows.map((r) => ({
       id: r.id,
-      title: r.name,
+      name: r.name,
       patientName: r.patient_name,
       patientId: r.patient_id,
       staff: r.staff_name,
@@ -89,23 +249,31 @@ router.get("/", async (req, res) => {
     // count total data
     let countSql = `
       SELECT COUNT(*) AS total
-      FROM sessions
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
       WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
     `;
 
     const countValues = [];
-    let countIndex = 1;
+    countValues.push(`%${search}%`);
+    let countIndex = 2;
 
     //put status into sql
     if (status !== undefined && status !== "") {
-      countSql += ` AND status = $${countIndex}`;
+      countSql += ` AND s.status = $${countIndex}`;
       countValues.push(Number(status));
       countIndex++;
     }
 
     //put staffId into sql
     if (staffId !== undefined && staffId !== "") {
-      countSql += ` AND staff_id = $${countIndex};`;
+      countSql += ` AND s.staff_id = $${countIndex}`;
       countValues.push(Number(staffId));
       countIndex++;
     }
@@ -178,6 +346,23 @@ router.post("/add-session", async (req, res) => {
       endAtWithZone,
     ]);
 
+    // get patient name
+    const { rows: patientRow } = await pool.query(
+      `
+      SELECT name
+      FROM people
+      WHERE id=$1;
+    `,
+      [parsedPatientId],
+    );
+
+    const patientName = patientRow[0].name;
+    // add this in recent actvities
+    await insertRecentActivity(
+      "session_created",
+      `New session scheduled for ${patientName}`,
+    );
+
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error("POST /sessions/add-session error:", err);
@@ -225,13 +410,31 @@ router.put("/:id", async (req, res) => {
     const startAtWithZone = melbourneStartAt.toISO();
     const endAtWithZone = melbourneEndAt.toISO();
 
-    if (!melbourneStartAt.isValid || !melbourneEndAt.isValid) {
-      return res.status(400).json({ error: "Invalid date/time format" });
+    const parsedStatus = Number(status);
+
+    if (![0, 1, 2].includes(parsedStatus)) {
+      return res.status(400).json({ error: "Invalid status" });
     }
+
+    // check old status
+    const checkOldStatusSql = `
+      SELECT s.status, patient.name AS patient_name
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      WHERE s.id=$1;
+    `;
+    const { rows: oldRows } = await pool.query(checkOldStatusSql, [sessionId]);
+
+    if (oldRows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const oldStatus = oldRows[0].status;
+    const patientName = oldRows[0].patient_name;
 
     const sql = `
       UPDATE sessions
-      SET name=$1, patient_id=$2, staff_id=$3, status=$4, start_at=$5, end_at=$6
+      SET name=$1, patient_id=$2, staff_id=$3, status=$4, start_at=$5, end_at=$6, updated_at = NOW()
       WHERE id=$7
       RETURNING *
     `;
@@ -240,15 +443,18 @@ router.put("/:id", async (req, res) => {
       sessionName,
       parsedPatientId,
       parsedStaffId,
-      status,
+      parsedStatus,
       startAtWithZone,
       endAtWithZone,
       sessionId,
     ]);
 
+    // add in recent activity
+    await logSessionStatusChange(oldStatus, parsedStatus, patientName);
+
     res.json(rows[0]);
   } catch (err) {
-    console.error("POST /sessions/:id error:", err);
+    console.error("PUT /sessions/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -267,6 +473,59 @@ router.delete("/:id", async (req, res) => {
     res.json(rows[0]);
   } catch (err) {
     console.error("DELETE /sessions/:id error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// change status of a session
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const sessionId = Number(req.params.id);
+    const status = Number(req.body.status);
+
+    if (!Number.isInteger(sessionId)) {
+      return res.status(400).json({ error: "Invalid session id" });
+    }
+
+    if (![0, 1, 2].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    // check old status
+    const checkOldStatusSql = `
+      SELECT s.status, patient.name AS patient_name
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      WHERE s.id=$1;
+    `;
+    const { rows: oldRows } = await pool.query(checkOldStatusSql, [sessionId]);
+
+    if (oldRows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const oldStatus = oldRows[0].status;
+    const patientName = oldRows[0].patient_name;
+
+    const sql = `
+      UPDATE sessions
+      SET status = $1
+      WHERE id = $2
+      RETURNING *
+    `;
+
+    const { rows } = await pool.query(sql, [status, sessionId]);
+
+    // add in recent activity
+    await logSessionStatusChange(oldStatus, status, patientName);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("PATCH /sessions/:id/status error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

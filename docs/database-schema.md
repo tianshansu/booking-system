@@ -89,4 +89,11 @@ CREATE TABLE IF NOT EXISTS sessions (
   CONSTRAINT sessions_end_after_start_chk CHECK (end_at IS NULL OR end_at > start_at)
 );
 
+CREATE TABLE recent_activity (
+  id SERIAL PRIMARY KEY,
+  type VARCHAR(50) NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 ```

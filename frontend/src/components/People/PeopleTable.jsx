@@ -1,15 +1,22 @@
 import "./PeopleTable.css";
 import PeopleRow from "./PeopleRow";
 
-export default function PeopleTable({ people, onDelete, onEdit, currentPage, totalPages, setCurrentPage }) {
+export default function PeopleTable({
+  people,
+  onDelete,
+  onEdit,
+  currentPage,
+  totalPages,
+  setCurrentPage,
+}) {
   return (
     <div className="people-table">
       <table className="people-table-table">
         <thead>
           <tr>
-            <th scope="col" className="people-table-table-header">
+            {/* <th scope="col" className="people-table-table-header">
               <input type="checkbox"></input>
-            </th>
+            </th> */}
             <th scope="col" className="people-table-table-header">
               NAME
             </th>

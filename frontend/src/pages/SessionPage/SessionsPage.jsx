@@ -1,8 +1,10 @@
 import "./SessionsPage.css";
 import "../../styles/form.css";
 import "../../styles/popups.css";
+import "../../styles/stateMsg.css";
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
+import Searchbar from "../../components/common/Searchbar";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 
@@ -30,48 +32,76 @@ export default function SessionsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
 
+  // search bar
+  const [search, setSearch] = useState("");
+
   //filter
   const [filterStatus, setFilterStatus] = useState("");
   const [filterStaffId, setFilterStaffId] = useState("");
+  const [filterSortTime, setFilterSortTime] = useState("");
+
+  // states
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchSessions = useCallback(async () => {
-    apiFetch(
-      `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}`,
-    )
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setSessions(data.data || []);
-        setTotalPages(data.totalPages || 1);
-      })
-      .catch((e) => console.error("fetch failed:", e));
-  }, [currentPage, filterStatus, filterStaffId]);
+    try {
+      // set is loading
+      setLoading(true);
+      setError("");
 
-  useEffect(() => {
-    fetchSessions();
+      const r = await apiFetch(
+        `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}&search=${search}&sortTime=${filterSortTime}`,
+      );
 
-    apiFetch("/api/people/patients/options")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setPatientsOptions(data);
-      })
-      .catch((e) => console.error("fetch failed:", e));
+      if (!r.ok) {
+        throw new Error(`HTTP ${r.status}`);
+      }
 
-    apiFetch("/api/people/staff/options")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        setStaffOptions(data);
-      })
-      .catch((e) => console.error("fetch failed:", e));
-  }, [fetchSessions]);
+      const data = await r.json();
+
+      setSessions(data.data || []);
+      setTotalPages(data.totalPages || 1);
+    } catch (e) {
+      console.error("fetch failed:", e);
+      setError("Failed to load sessions.");
+      setSessions([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [limit, currentPage, filterStatus, filterStaffId, search, filterSortTime]);
+
+  // export to csv
+  const handleExport = async () => {
+    let response = await apiFetch(
+      `/api/sessions/export?status=${filterStatus}&staffId=${filterStaffId}&search=${search}`,
+      {
+        method: "GET",
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sessions.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    setMsg("Sessions exported successfully");
+    setShowMsg(true);
+    setTimeout(() => {
+      setShowMsg(false);
+    }, 1000);
+  };
 
   // open add session form
   const openAddForm = () => {
@@ -95,7 +125,7 @@ export default function SessionsPage() {
     setEditingSessionId(session.id);
 
     setFormTitle("Edit A Session");
-    setSessionName(session.title);
+    setSessionName(session.name);
     setPatientId(session.patientId);
     setStaffId(session.staffId);
     setStatus(session.status);
@@ -148,10 +178,10 @@ export default function SessionsPage() {
     if (response.ok) {
       isEditMode
         ? setMsg("Session edited successfully")
-        : setMsg("Failed to edit session");
+        : setMsg("Session added successfully");
     } else {
       isEditMode
-        ? setMsg("Session added successfully")
+        ? setMsg("Failed to edit session")
         : setMsg("Failed to add session");
     }
 
@@ -194,18 +224,59 @@ export default function SessionsPage() {
 
   // filter clear
   const handleFilterClear = () => {
-    // reset filter
     setFilterStatus("");
     setFilterStaffId("");
+    setCurrentPage(1);
+    setFilterSortTime("");
   };
+
+  useEffect(() => {
+    fetchSessions();
+
+    apiFetch("/api/people/patients/options")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setPatientsOptions(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+
+    apiFetch("/api/people/staff/options")
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setStaffOptions(data);
+      })
+      .catch((e) => console.error("fetch failed:", e));
+  }, [fetchSessions]);
 
   return (
     <>
       <div className="sessions">
         <div className="sessions-header">
-          <div>View and manage all sessions in the system.</div>
+          <div className="sessions-header-element">
+            <div>View and manage all sessions in the system.</div>
+            <div className="sessions-search-filter">
+              <Searchbar
+                placeholder="Session name, patient or staff name"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </div>
           <div className="sessions-header-buttons">
-            <button className="sessions-header-button" type="button">
+            <button
+              className="sessions-header-button"
+              type="button"
+              onClick={handleExport}
+            >
               <img
                 className="sessions-header-button-img"
                 src="/icons/import.svg"
@@ -347,21 +418,37 @@ export default function SessionsPage() {
           </div>
         </div>
         <SessionsFilterBar
-          onFilterStatus={setFilterStatus}
+          onFilterStatus={(value) => {
+            setFilterStatus(value);
+            setCurrentPage(1);
+          }}
           filterStatus={filterStatus}
-          onFilterStaff={setFilterStaffId}
+          onFilterStaff={(value) => {
+            setFilterStaffId(value);
+            setCurrentPage(1);
+          }}
           filterStaff={filterStaffId}
+          onFilterSortTime={(value) => setFilterSortTime(value)}
+          filterSortTime={filterSortTime}
           staffOptions={staffOptions}
           onClear={handleFilterClear}
         />
-        <SessionsTable
-          sessions={sessions}
-          onEdit={openEditForm}
-          setCurrentPage={setCurrentPage}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onDelete={handleDelete}
-        />
+        {loading ? (
+          <div className="state-message">Loading sessions...</div>
+        ) : error ? (
+          <div className="state-message state-error">{error}</div>
+        ) : sessions.length === 0 ? (
+          <div className="state-message">No sessions found.</div>
+        ) : (
+          <SessionsTable
+            sessions={sessions}
+            onEdit={openEditForm}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </>
   );

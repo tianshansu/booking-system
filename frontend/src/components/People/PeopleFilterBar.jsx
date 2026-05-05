@@ -1,13 +1,10 @@
 import "../../styles/filterbar.css";
 
-export default function SessionsFilterBar({
+export default function PeopleFilterBar({
   onFilterStatus,
   filterStatus,
-  onFilterStaff,
-  filterStaff,
-  onFilterSortTime,
-  filterSortTime,
-  staffOptions,
+  onFilterName,
+  filterName,
   onClear,
 }) {
   return (
@@ -26,34 +23,20 @@ export default function SessionsFilterBar({
             value={filterStatus}
           >
             <option value="">Status: All</option>
-            <option value="0">Scheduled</option>
-            <option value="1">Completed</option>
-            <option value="2">Canceled</option>
-          </select>
-
-          <select
-            className="filter-bar-item-select"
-            onChange={(e) => onFilterStaff(e.target.value)}
-            value={filterStaff}
-          >
-            <option value="">Staff: All</option>
-            {staffOptions.map((staff) => (
-              <option key={staff.id} value={staff.id}>
-                {staff.name}
-              </option>
-            ))}
+            <option value="0">Active</option>
+            <option value="1">Inactive</option>
           </select>
 
           {/* sorting */}
           <div>Sort by:</div>
           <select
             className="filter-bar-item-select"
-            onChange={(e) => onFilterSortTime(e.target.value)}
-            value={filterSortTime}
+            onChange={(e) => onFilterName(e.target.value)}
+            value={filterName}
           >
             <option value="">Default</option>
-            <option value="desc">Newest</option>
-            <option value="asc">Oldest</option>
+            <option value="asc">Name: A to Z</option>
+            <option value="desc">Name: Z to A</option>
           </select>
         </div>
         <div className="filter-bar-item-right">

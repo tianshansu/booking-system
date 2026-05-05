@@ -1,18 +1,20 @@
-export default function UpcomingSessionList({sessions, RowComponent}){
-    return(
-        <div>
-            {
-                sessions.map(item=>(
-                    <RowComponent
-                        key={item.id}
-                        date={item.date}
-                        time={item.time}
-                        title={item.title}
-                        patientName={item.patientName}>
-                    </RowComponent>
-                ))
-                // map items to render
-            }
-        </div>
-    )
+export default function UpcomingSessionList({
+  sessions,
+  RowComponent,
+  onMarkCanceled,
+}) {
+  return (
+    <div>
+      {
+        sessions.map((session) => (
+          <RowComponent
+            key={session.id}
+            session={session}
+            onMarkCanceled={onMarkCanceled}
+          ></RowComponent>
+        ))
+        // map items to render
+      }
+    </div>
+  );
 }
