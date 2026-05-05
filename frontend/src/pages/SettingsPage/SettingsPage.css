@@ -1,0 +1,26 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-group-title {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.settings-group-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-submit {
+  width: 120px;
+}
