@@ -5,12 +5,14 @@ const TITLE_MAP = {
   "/": "Dashboard",
   "/people": "People",
   "/sessions": "Sessions",
+  "/settings": "Settings",
 };
 
 const SUBTITLE_MAP = {
   "/": "Welcome back!",
   "/people": "Manage clients and records",
   "/sessions": "Manage sessions",
+  "/settings": "Manage your acount",
 };
 
 export default function HeaderBar() {
