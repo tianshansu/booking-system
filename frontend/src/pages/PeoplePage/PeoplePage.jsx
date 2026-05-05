@@ -12,7 +12,7 @@ import PeopleFilterBar from "../../components/People/PeopleFilterBar";
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5; // show 5 people on each page
 
