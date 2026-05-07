@@ -1,3 +1,5 @@
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "";
+
 export async function apiFetch(url, options = {}) {
   const token = localStorage.getItem("token");
 
@@ -11,7 +13,10 @@ export async function apiFetch(url, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers,
+  });
 
   // if receive 401 -> go to login page
   if (res.status === 401) {
