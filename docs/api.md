@@ -66,6 +66,98 @@ For protected APIs, include this header in every request:
 
 Authorization: Bearer <token>
 
+## GET /api/auth/me
+
+Purpose:
+
+- Get the current authenticated user's email.
+
+Auth:
+
+- Required
+
+Query params:
+
+- None
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Response fields:
+
+email: string
+
+Errors:
+
+500: Internal server error
+
+## PUT /api/auth/change-password
+
+Purpose:
+
+- Change the current authenticated user's password.
+
+Auth:
+
+- Required
+
+Query params:
+
+- None
+
+Request body:
+
+```json
+{
+  "currentPassword": "oldpassword123",
+  "newPassword": "newpassword456"
+}
+```
+
+Request body fields:
+
+currentPassword: string (required)
+
+newPassword: string (required)
+
+Response 200:
+
+```
+{
+  "ok": true,
+  "message": "Password changed successfully"
+}
+```
+
+Response fields:
+
+ok: boolean
+
+message: string
+
+Errors:
+
+400: currentPassword and newPassword are required
+
+400: New password must be at least 6 characters
+
+401: Current password is incorrect
+
+403: Account disabled
+
+404: User not found
+
+500: Internal server error
+
 # People
 
 ## GET /api/people

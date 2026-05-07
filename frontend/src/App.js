@@ -5,6 +5,7 @@ import PeoplePage from "./pages/PeoplePage/PeoplePage";
 import SessionsPage from "./pages/SessionPage/SessionsPage";
 import AppLayout from "./components/layout/AppLayout";
 import LoginPage from "./pages/LoginPage/LoginPage";
+import SettingsPage from "./pages/SettingsPage/SettingsPage";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         {/* path= "/" */}
         <Route path="people" element={<PeoplePage />} />
         <Route path="sessions" element={<SessionsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   );
