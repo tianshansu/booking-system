@@ -12,6 +12,7 @@ import RecentActivityListRow from "../../components/dashboard/RecentActivityList
 import OverlayModal from "../../components/common/OverlayModal";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
+import AiAssistant from "../../components/aiAssistant/AiAssistant";
 
 export default function DashboardPage() {
   const [todaySessions, setTodaySessions] = useState([]);
@@ -285,6 +286,7 @@ export default function DashboardPage() {
           ></RecentActivityList>
         </ListPanel>
       </div>
+      <AiAssistant></AiAssistant>
     </div>
   );
 }

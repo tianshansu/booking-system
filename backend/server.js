@@ -8,6 +8,7 @@ const sessionsRoutes = require("./routes/sessionsRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const authRoutes = require("./routes/authRoutes");
 const authMiddleware = require("./middleware/authMiddleware"); // check login
+const aiHelpRoutes = require("./routes/aiHelp"); // ai assistant
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.use("/api/sessions", authMiddleware, sessionsRoutes);
 app.use("/api/dashboard", authMiddleware, dashboardRoutes);
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/ai", aiHelpRoutes);
 
 const PORT = process.env.PORT || 4000;
 
