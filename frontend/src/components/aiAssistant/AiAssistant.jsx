@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./AiAssistant.css";
+import { apiFetch } from "../../api";
 
 export default function AiAssistant() {
   const [open, setOpen] = useState(false);
@@ -33,24 +34,10 @@ export default function AiAssistant() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            text: "Please log in to use the AI assistant.",
-          },
-        ]);
-        return;
-      }
-
-      const res = await fetch("/api/ai/help", {
+      const res = await apiFetch("/api/ai/help", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           question: userQuestion,
