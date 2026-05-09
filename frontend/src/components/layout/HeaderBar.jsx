@@ -1,4 +1,4 @@
-import "./HeaderBar.css";
+import { AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { useLocation } from "react-router-dom";
 
 const TITLE_MAP = {
@@ -12,23 +12,41 @@ const SUBTITLE_MAP = {
   "/": "Welcome back!",
   "/people": "Manage clients and records",
   "/sessions": "Manage sessions",
-  "/settings": "Manage your acount",
+  "/settings": "Manage your account",
 };
 
 export default function HeaderBar() {
   const location = useLocation();
-  const path = location.pathname; //get path name from location
+  const path = location.pathname;
 
-  const title = TITLE_MAP[path] ?? "Dashboard"; //if the path exists in TITLE_MAP, then give the value to title
-  const subtitle = SUBTITLE_MAP[path] ?? "Welcome back!"; //similar to above
+  const title = TITLE_MAP[path] ?? "Dashboard";
+  const subtitle = SUBTITLE_MAP[path] ?? "Welcome back!";
 
   return (
-    <header className="header">
-      <div className="header-content">
-        {/* display values */}
-        <div className="header-content-title">{title}</div>
-        <div className="header-content-text">{subtitle}</div>
-      </div>
-    </header>
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        bgcolor: "background.paper",
+        color: "text.primary",
+        borderBottom: "1px solid #E5E7EB",
+      }}
+    >
+      <Toolbar
+        sx={{
+          minHeight: 72,
+          px: 3,
+          justifyContent: "space-between",
+        }}
+      >
+        <Box>
+          <Typography variant="h5">{title}</Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {subtitle}
+          </Typography>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
