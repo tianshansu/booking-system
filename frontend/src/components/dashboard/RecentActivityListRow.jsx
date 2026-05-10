@@ -4,12 +4,6 @@ import EventBusyIcon from "@mui/icons-material/EventBusy";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 
 export default function RecentActivityListRow({ activity }) {
-  const styles = {
-    icon: {
-      height: 40,
-    },
-  };
-
   function formatTimeAgo(dateString) {
     const diffHours = Math.floor(
       (Date.now() - new Date(dateString)) / (1000 * 60 * 60),

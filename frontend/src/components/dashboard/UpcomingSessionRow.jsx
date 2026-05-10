@@ -6,15 +6,6 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 export default function UpcomingSessionRow({ session, onMarkCanceled }) {
   const [showOptions, setShowOptions] = useState(false);
-  const styles = {
-    icon: {
-      height: 20,
-    },
-    button: {
-      background: "none",
-      border: "none",
-    },
-  };
 
   return (
     <ListItem
