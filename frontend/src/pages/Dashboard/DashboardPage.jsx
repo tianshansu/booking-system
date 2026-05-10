@@ -1,7 +1,6 @@
-import "./Dashboard.css";
 import "../../styles/popups.css";
 import "../../styles/form.css";
-import Card from "../../components/common/Card";
+import SummaryCard from "../../components/common/SummaryCard";
 import ListPanel from "../../components/common/ListPanel";
 import TodaySessionList from "../../components/dashboard/TodaySessionList";
 import UpcomingSessionList from "../../components/dashboard/UpcomingSessionList";
@@ -13,6 +12,7 @@ import OverlayModal from "../../components/common/OverlayModal";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 import AiAssistant from "../../components/aiAssistant/AiAssistant";
+import { Box, Button, Card, CardContent } from "@mui/material";
 
 export default function DashboardPage() {
   const [todaySessions, setTodaySessions] = useState([]);
@@ -150,100 +150,87 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div style={{ display: "grid" }}>
-      <div
-        style={{
+    <Box sx={{ display: "grid", gap: 3 }}>
+      <Box
+        sx={{
           display: "grid",
           gridTemplateColumns: "repeat(4, minmax(0, 1fr))", // divide into four columns
-          gap: 20,
-          marginBottom: 30,
+          gap: 3,
         }}
       >
-        <Card
+        <SummaryCard
           title="Today's Sessions"
           count={summary.today_count ?? 0}
-          comment="+2 from yesterday"
-        ></Card>
-        <Card
+          comment="Today"
+        ></SummaryCard>
+        <SummaryCard
           title="Upcoming"
           count={summary.upcoming_count ?? 0}
           comment="Next 7 days"
-        ></Card>
-        <Card
+        ></SummaryCard>
+        <SummaryCard
           title="Completed"
           count={summary.completed_count ?? 0}
           comment="This month"
-        ></Card>
-        <Card
+        ></SummaryCard>
+        <SummaryCard
           title="Active People"
           count={summary.active_people ?? 0}
           comment="Total registered"
-        ></Card>
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          gap: 20,
-          marginBottom: 30,
-        }}
-      >
-        <ListPanel
-          title="Today's Sessions"
-          subtitle={todayDateFormat}
-          footer={
-            <button
-              type="button"
-              style={{
-                background: "none",
-                border: "none",
-                padding: 10,
-                font: "inherit",
-                color: "#2563EB",
-                fontSize: "16px",
-              }}
-              onClick={() => setShowAllTodaySessions(true)}
+        ></SummaryCard>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 3, width: "100%" }}>
+        <Card sx={{ flex: 1, minWidth: 0 }}>
+          <CardContent>
+            <ListPanel
+              title="Today's Sessions"
+              subtitle={todayDateFormat}
+              footer={
+                <Button
+                  type="button"
+                  sx={{ fontSize: "14px", fontWeight: "600" }}
+                  onClick={() => setShowAllTodaySessions(true)}
+                >
+                  view all today's sessions
+                </Button>
+              }
             >
-              view all today's sessions
-            </button>
-          }
-        >
-          <TodaySessionList
-            sessions={todayPreview}
-            RowComponent={TodaySessionRow}
-            onMarkCompleted={handleMarkComplete}
-            onMarkCanceled={handleMarkCancel}
-          ></TodaySessionList>
-          {/* send corresponding session data and the RowComponent to list */}
-        </ListPanel>
-        <ListPanel
-          title="Upcoming Sessions"
-          subtitle="Next 7 days"
-          footer={
-            <button
-              type="button"
-              style={{
-                background: "none",
-                border: "none",
-                padding: 10,
-                font: "inherit",
-                color: "#2563EB",
-                fontSize: "16px",
-              }}
-              onClick={() => setShowAllUpcomingSessions(true)}
+              <TodaySessionList
+                sessions={todayPreview}
+                RowComponent={TodaySessionRow}
+                onMarkCompleted={handleMarkComplete}
+                onMarkCanceled={handleMarkCancel}
+              ></TodaySessionList>
+              {/* send corresponding session data and the RowComponent to list */}
+            </ListPanel>
+          </CardContent>
+        </Card>
+        <Card sx={{ flex: 1, minWidth: 0 }}>
+          <CardContent>
+            <ListPanel
+              title="Upcoming Sessions"
+              subtitle="Next 7 days"
+              footer={
+                <Button
+                  type="button"
+                  sx={{ fontSize: "14px", fontWeight: "600" }}
+                  onClick={() => setShowAllUpcomingSessions(true)}
+                >
+                  view sesisons in 7 days
+                </Button>
+              }
             >
-              view sesisons in 7 days
-            </button>
-          }
-        >
-          <UpcomingSessionList
-            sessions={upcomingPreview}
-            RowComponent={UpcomingSessionRow}
-            onMarkCanceled={handleMarkCancel}
-          ></UpcomingSessionList>
-          {/* send corresponding session data and the RowComponent to list */}
-        </ListPanel>
-      </div>
+              <UpcomingSessionList
+                sessions={upcomingPreview}
+                RowComponent={UpcomingSessionRow}
+                onMarkCanceled={handleMarkCancel}
+              ></UpcomingSessionList>
+              {/* send corresponding session data and the RowComponent to list */}
+            </ListPanel>
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* pop ups & overlays */}
       {showMsg && <div className="toast-message">{msg}</div>}
@@ -275,18 +262,22 @@ export default function DashboardPage() {
           ></UpcomingSessionList>
         </OverlayModal>
       )}
-      <div>
-        <ListPanel
-          title="Recent Activity"
-          subtitle="Latest updates and changes"
-        >
-          <RecentActivityList
-            activities={recentActivities}
-            RowComponent={RecentActivityListRow}
-          ></RecentActivityList>
-        </ListPanel>
-      </div>
+      <Box>
+        <Card>
+          <CardContent>
+            <ListPanel
+              title="Recent Activity"
+              subtitle="Latest updates and changes"
+            >
+              <RecentActivityList
+                activities={recentActivities}
+                RowComponent={RecentActivityListRow}
+              ></RecentActivityList>
+            </ListPanel>
+          </CardContent>
+        </Card>
+      </Box>
       <AiAssistant></AiAssistant>
-    </div>
+    </Box>
   );
 }
