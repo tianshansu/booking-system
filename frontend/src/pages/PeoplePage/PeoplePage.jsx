@@ -1,5 +1,3 @@
-import "./PeoplePage.css";
-import "../../styles/form.css";
 import "../../styles/popups.css";
 import "../../styles/stateMsg.css";
 import PeopleTable from "../../components/People/PeopleTable";
@@ -8,6 +6,24 @@ import DeleteConfirm from "../../components/common/DeleteConfirm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../api";
 import PeopleFilterBar from "../../components/People/PeopleFilterBar";
+import PageContainer from "../../components/common/PageContainer";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
+import PublishIcon from "@mui/icons-material/Publish";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
@@ -277,30 +293,28 @@ export default function PeoplePage() {
   };
 
   return (
-    <div className="people">
-      <div className="people-header">
-        <div className="people-header-element">
+    <PageContainer>
+      <Box
+        sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}
+      >
+        <Box>
           View and manage all people in the system.
-          <div className="people-role-search">
+          <Box sx={{ display: "flex", gap: 1 }}>
             {/* role selection - patient in default */}
-            <div className="people-role-tabs">
-              <button
-                type="button"
-                className={
-                  roleTab === "patient" ? "role-tab active" : "role-tab"
-                }
+            <ButtonGroup sx={{ mt: 1.5 }}>
+              <Button
+                variant={roleTab === "patient" ? "contained" : "outlined"}
                 onClick={() => setRoleTab("patient")}
               >
                 Patient
-              </button>
-              <button
-                type="button"
-                className={roleTab === "staff" ? "role-tab active" : "role-tab"}
+              </Button>
+              <Button
+                variant={roleTab === "staff" ? "contained" : "outlined"}
                 onClick={() => setRoleTab("staff")}
               >
                 Staff
-              </button>
-            </div>
+              </Button>
+            </ButtonGroup>
 
             <Searchbar
               placeholder="Name, email or phone"
@@ -310,22 +324,19 @@ export default function PeoplePage() {
                 setCurrentPage(1);
               }}
             />
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="people-header-buttons">
-          <button
-            className="people-header-button"
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            variant="outlined"
             type="button"
             onClick={handleImportClick}
+            sx={{ height: 40 }}
           >
-            <img
-              className="people-header-button-img"
-              src="/icons/import.svg"
-              alt="import icon"
-            ></img>
-            <div className="people-header-button-text">Import</div>
-          </button>
+            <PublishIcon sx={{ color: "primary.main" }} />
+            <Typography>Import</Typography>
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
@@ -334,133 +345,140 @@ export default function PeoplePage() {
             onChange={handleImportFileChange}
           />
 
-          <button
-            className="people-header-button"
-            style={{ backgroundColor: "#4338CA", border: "none" }}
+          <Button
+            variant="contained"
+            sx={{ height: 40 }}
             type="button"
             onClick={openAddForm}
           >
-            <img
-              className="people-header-button-img"
-              src="/icons/add.svg"
-              alt="add person"
-            ></img>
-            <div
-              className="people-header-button-text"
-              style={{ color: "white" }}
-            >
-              Add person
-            </div>
-          </button>
+            <AddIcon />
+            <Typography style={{ color: "white" }}>Add person</Typography>
+          </Button>
 
-          {showAddForm && (
-            <div className="app-modal">
-              <div className="app-form-title">{formTitle}</div>
-              <form onSubmit={handleSubmit}>
-                <div className="app-form-input-row">
-                  <div className="app-form-input-row-label">Name:</div>
-                  <input
-                    className="app-form-input-row-value"
+          <Dialog open={showAddForm} onClose={() => setShowAddForm(false)}>
+            <DialogTitle>{formTitle}</DialogTitle>
+            <DialogContent>
+              <Box
+                component="form"
+                onSubmit={handleSubmit}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                  minWidth: 400,
+                }}
+              >
+                <Box>
+                  <TextField
+                    label="Name"
                     type="text"
-                    placeholder="Name"
                     value={name}
+                    required
+                    fullWidth
+                    variant="standard"
                     onChange={(e) => setName(e.target.value)}
-                  ></input>
-                </div>
-                <div className="app-form-input-row">
-                  <div className="app-form-input-row-label">Email:</div>
-                  <input
-                    className="app-form-input-row-value"
+                  ></TextField>
+                </Box>
+                <Box>
+                  <TextField
+                    label="Email"
                     type="text"
-                    placeholder="Email"
                     value={email}
+                    required
+                    fullWidth
+                    variant="standard"
                     onChange={(e) => setEmail(e.target.value)}
-                  ></input>
-                </div>
-                <div className="app-form-input-row">
-                  <div className="app-form-input-row-label">Phone:</div>
-                  <input
-                    className="app-form-input-row-value"
+                  ></TextField>
+                </Box>
+                <Box>
+                  <TextField
+                    label="Phone"
                     type="text"
-                    placeholder="Phone"
                     value={phone}
+                    fullWidth
+                    variant="standard"
                     onChange={(e) => setPhone(e.target.value)}
-                  ></input>
-                </div>
+                  ></TextField>
+                </Box>
                 {/* show status only in edit mode */}
                 {isEditMode && (
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">Status:</div>
-
-                    <label>
-                      <input
-                        type="radio"
-                        name="status"
+                  <FormControl>
+                    <FormLabel>Status:</FormLabel>
+                    <RadioGroup row>
+                      <FormControlLabel
+                        control={<Radio />}
+                        label="Active"
                         value={0}
                         checked={status === 0}
                         onChange={() => setStatus(0)}
                       />
-                      Active
-                    </label>
 
-                    <label>
-                      <input
-                        type="radio"
-                        name="status"
+                      <FormControlLabel
+                        control={<Radio />}
+                        label="Inactive"
                         value={1}
                         checked={status === 1}
                         onChange={() => setStatus(1)}
                       />
-                      Inactive
-                    </label>
-                  </div>
+                    </RadioGroup>
+                  </FormControl>
                 )}
                 {!isEditMode && (
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">Role:</div>
-                    <label>
-                      <input
-                        type="radio"
-                        name="role"
+                  <FormControl>
+                    <FormLabel>Role</FormLabel>
+                    <RadioGroup row>
+                      <FormControlLabel
+                        control={<Radio />}
+                        label="Patient"
                         value={"patient"}
                         checked={role === "patient"}
                         onChange={() => setRole("patient")}
                       />
-                      Patient
-                    </label>
-
-                    <label>
-                      <input
-                        type="radio"
-                        name="role"
+                      <FormControlLabel
+                        control={<Radio />}
+                        label="Staff"
                         value={"staff"}
                         checked={role === "staff"}
                         onChange={() => setRole("staff")}
                       />
-                      Staff
-                    </label>
-                  </div>
+                    </RadioGroup>
+                  </FormControl>
                 )}
 
-                <div className="app-form-input-row">
-                  <div className="app-form-input-row-label">Notes:</div>
-                  <input
-                    className="app-form-input-row-value"
+                <FormControl>
+                  <FormLabel>Notes</FormLabel>
+                  <TextField
+                    id="outlined-multiline-static"
+                    multiline
+                    maxRows={4}
                     type="text"
-                    placeholder="Notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                  ></input>
-                </div>
-                <div className="app-form-buttons">
-                  <button onClick={() => setShowAddForm(false)} type="button">
+                  ></TextField>
+                </FormControl>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 2,
+                    mt: 3,
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowAddForm(false)}
+                    type="button"
+                  >
                     Cancel
-                  </button>
-                  <button type="submit">Submit</button>
-                </div>
-              </form>
-            </div>
-          )}
+                  </Button>
+                  <Button variant="contained" type="submit">
+                    Submit
+                  </Button>
+                </Box>
+              </Box>
+            </DialogContent>
+          </Dialog>
+
           {showMsg && <div className="toast-message">{msg}</div>}
           {showDeleteConfirm && (
             <DeleteConfirm
@@ -469,8 +487,8 @@ export default function PeoplePage() {
               onConfirm={handleDelete}
             ></DeleteConfirm>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       <PeopleFilterBar
         onFilterStatus={(value) => {
@@ -503,6 +521,6 @@ export default function PeoplePage() {
           setCurrentPage={setCurrentPage}
         ></PeopleTable>
       )}
-    </div>
+    </PageContainer>
   );
 }

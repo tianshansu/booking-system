@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 import AiAssistant from "../../components/aiAssistant/AiAssistant";
 import { Box, Button, Card, CardContent } from "@mui/material";
+import PageContainer from "../../components/common/PageContainer";
 
 export default function DashboardPage() {
   const [todaySessions, setTodaySessions] = useState([]);
@@ -150,7 +151,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <Box sx={{ display: "grid", gap: 3 }}>
+    <PageContainer>
       <Box
         sx={{
           display: "grid",
@@ -278,6 +279,6 @@ export default function DashboardPage() {
         </Card>
       </Box>
       <AiAssistant></AiAssistant>
-    </Box>
+    </PageContainer>
   );
 }

@@ -7,6 +7,7 @@ import SessionsTable from "../../components/sessions/SessionsTable";
 import Searchbar from "../../components/common/Searchbar";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api";
+import PageContainer from "../../components/common/PageContainer";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
@@ -255,201 +256,199 @@ export default function SessionsPage() {
   }, [fetchSessions]);
 
   return (
-    <>
-      <div className="sessions">
-        <div className="sessions-header">
-          <div className="sessions-header-element">
-            <div>View and manage all sessions in the system.</div>
-            <div className="sessions-search-filter">
-              <Searchbar
-                placeholder="Session name, patient or staff name"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
+    <PageContainer>
+      <div className="sessions-header">
+        <div className="sessions-header-element">
+          <div>View and manage all sessions in the system.</div>
+          <div className="sessions-search-filter">
+            <Searchbar
+              placeholder="Session name, patient or staff name"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
           </div>
+        </div>
+        <div className="sessions-header-buttons">
+          <button
+            className="sessions-header-button"
+            type="button"
+            onClick={handleExport}
+          >
+            <img
+              className="sessions-header-button-img"
+              src="/icons/import.svg"
+              alt="import icon"
+            ></img>
+            <div className="sessions-header-button-text">Export</div>
+          </button>
+
           <div className="sessions-header-buttons">
             <button
               className="sessions-header-button"
+              style={{ backgroundColor: "#4338CA", border: "none" }}
               type="button"
-              onClick={handleExport}
+              onClick={openAddForm}
             >
               <img
                 className="sessions-header-button-img"
-                src="/icons/import.svg"
-                alt="import icon"
+                src="/icons/add.svg"
+                alt="add session"
               ></img>
-              <div className="sessions-header-button-text">Export</div>
+              <div
+                className="sessions-header-button-text"
+                style={{ color: "white" }}
+              >
+                Add session
+              </div>
             </button>
 
-            <div className="sessions-header-buttons">
-              <button
-                className="sessions-header-button"
-                style={{ backgroundColor: "#4338CA", border: "none" }}
-                type="button"
-                onClick={openAddForm}
-              >
-                <img
-                  className="sessions-header-button-img"
-                  src="/icons/add.svg"
-                  alt="add session"
-                ></img>
-                <div
-                  className="sessions-header-button-text"
-                  style={{ color: "white" }}
-                >
-                  Add session
-                </div>
-              </button>
-
-              {/* add session form */}
-              {showForm && (
-                <div className="app-modal">
-                  <div className="app-form-title">{formTitle}</div>
-                  <form onSubmit={handleSubmit}>
+            {/* add session form */}
+            {showForm && (
+              <div className="app-modal">
+                <div className="app-form-title">{formTitle}</div>
+                <form onSubmit={handleSubmit}>
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">Name:</div>
+                    <input
+                      className="app-form-input-row-value"
+                      type="text"
+                      placeholder="Session Name"
+                      value={sessionName}
+                      onChange={(e) => setSessionName(e.target.value)}
+                    ></input>
+                  </div>
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">Patient:</div>
+                    <select
+                      className="app-form-input-row-value"
+                      onChange={(e) => setPatientId(e.target.value)}
+                      value={patientId}
+                    >
+                      <option>Please select a patient</option>
+                      {patientsOptions.map((patient) => (
+                        <option key={patient.id} value={patient.id}>
+                          {patient.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">Staff:</div>
+                    <select
+                      className="app-form-input-row-value"
+                      onChange={(e) => setStaffId(e.target.value)}
+                      value={staffId}
+                    >
+                      <option>Please select a staff</option>
+                      {staffOptions.map((staff) => (
+                        <option key={staff.id} value={staff.id}>
+                          {staff.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* show status */}
+                  {isEditMode && (
                     <div className="app-form-input-row">
-                      <div className="app-form-input-row-label">Name:</div>
-                      <input
-                        className="app-form-input-row-value"
-                        type="text"
-                        placeholder="Session Name"
-                        value={sessionName}
-                        onChange={(e) => setSessionName(e.target.value)}
-                      ></input>
-                    </div>
-                    <div className="app-form-input-row">
-                      <div className="app-form-input-row-label">Patient:</div>
-                      <select
-                        className="app-form-input-row-value"
-                        onChange={(e) => setPatientId(e.target.value)}
-                        value={patientId}
-                      >
-                        <option>Please select a patient</option>
-                        {patientsOptions.map((patient) => (
-                          <option key={patient.id} value={patient.id}>
-                            {patient.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="app-form-input-row">
-                      <div className="app-form-input-row-label">Staff:</div>
-                      <select
-                        className="app-form-input-row-value"
-                        onChange={(e) => setStaffId(e.target.value)}
-                        value={staffId}
-                      >
-                        <option>Please select a staff</option>
-                        {staffOptions.map((staff) => (
-                          <option key={staff.id} value={staff.id}>
-                            {staff.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {/* show status */}
-                    {isEditMode && (
-                      <div className="app-form-input-row">
-                        <div className="app-form-input-row-label">Status:</div>
-                        <div className="app-form-input-row-value">
-                          <label>
-                            <input
-                              type="radio"
-                              name="status"
-                              value={0}
-                              checked={status === 0}
-                              onChange={() => setStatus(0)}
-                            ></input>
-                            Scheduled
-                          </label>
-                          <label>
-                            <input
-                              type="radio"
-                              name="status"
-                              value={1}
-                              checked={status === 1}
-                              onChange={() => setStatus(1)}
-                            ></input>
-                            Completed
-                          </label>
-                          <label>
-                            <input
-                              type="radio"
-                              name="status"
-                              value={2}
-                              checked={status === 2}
-                              onChange={() => setStatus(2)}
-                            ></input>
-                            Canceled
-                          </label>
-                        </div>
+                      <div className="app-form-input-row-label">Status:</div>
+                      <div className="app-form-input-row-value">
+                        <label>
+                          <input
+                            type="radio"
+                            name="status"
+                            value={0}
+                            checked={status === 0}
+                            onChange={() => setStatus(0)}
+                          ></input>
+                          Scheduled
+                        </label>
+                        <label>
+                          <input
+                            type="radio"
+                            name="status"
+                            value={1}
+                            checked={status === 1}
+                            onChange={() => setStatus(1)}
+                          ></input>
+                          Completed
+                        </label>
+                        <label>
+                          <input
+                            type="radio"
+                            name="status"
+                            value={2}
+                            checked={status === 2}
+                            onChange={() => setStatus(2)}
+                          ></input>
+                          Canceled
+                        </label>
                       </div>
-                    )}
-                    <div className="app-form-input-row">
-                      <div className="app-form-input-row-label">Start At:</div>
-                      <input
-                        type="datetime-local"
-                        onChange={(e) => setStartAt(e.target.value)}
-                        value={startAt}
-                      ></input>
                     </div>
-                    <div className="app-form-input-row">
-                      <div className="app-form-input-row-label">End At:</div>
-                      <input
-                        type="datetime-local"
-                        onChange={(e) => setEndAt(e.target.value)}
-                        value={endAt}
-                      ></input>
-                    </div>
-                    <div className="app-form-buttons">
-                      <button type="button" onClick={() => setShowForm(false)}>
-                        Cancel
-                      </button>
-                      <button type="submit">Submit</button>
-                    </div>
-                  </form>
-                </div>
-              )}
-              {showMsg && <div className="toast-message">{msg}</div>}
-            </div>
+                  )}
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">Start At:</div>
+                    <input
+                      type="datetime-local"
+                      onChange={(e) => setStartAt(e.target.value)}
+                      value={startAt}
+                    ></input>
+                  </div>
+                  <div className="app-form-input-row">
+                    <div className="app-form-input-row-label">End At:</div>
+                    <input
+                      type="datetime-local"
+                      onChange={(e) => setEndAt(e.target.value)}
+                      value={endAt}
+                    ></input>
+                  </div>
+                  <div className="app-form-buttons">
+                    <button type="button" onClick={() => setShowForm(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit">Submit</button>
+                  </div>
+                </form>
+              </div>
+            )}
+            {showMsg && <div className="toast-message">{msg}</div>}
           </div>
         </div>
-        <SessionsFilterBar
-          onFilterStatus={(value) => {
-            setFilterStatus(value);
-            setCurrentPage(1);
-          }}
-          filterStatus={filterStatus}
-          onFilterStaff={(value) => {
-            setFilterStaffId(value);
-            setCurrentPage(1);
-          }}
-          filterStaff={filterStaffId}
-          onFilterSortTime={(value) => setFilterSortTime(value)}
-          filterSortTime={filterSortTime}
-          staffOptions={staffOptions}
-          onClear={handleFilterClear}
-        />
-        {loading ? (
-          <div className="state-message">Loading sessions...</div>
-        ) : error ? (
-          <div className="state-message state-error">{error}</div>
-        ) : sessions.length === 0 ? (
-          <div className="state-message">No sessions found.</div>
-        ) : (
-          <SessionsTable
-            sessions={sessions}
-            onEdit={openEditForm}
-            setCurrentPage={setCurrentPage}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onDelete={handleDelete}
-          />
-        )}
       </div>
-    </>
+      <SessionsFilterBar
+        onFilterStatus={(value) => {
+          setFilterStatus(value);
+          setCurrentPage(1);
+        }}
+        filterStatus={filterStatus}
+        onFilterStaff={(value) => {
+          setFilterStaffId(value);
+          setCurrentPage(1);
+        }}
+        filterStaff={filterStaffId}
+        onFilterSortTime={(value) => setFilterSortTime(value)}
+        filterSortTime={filterSortTime}
+        staffOptions={staffOptions}
+        onClear={handleFilterClear}
+      />
+      {loading ? (
+        <div className="state-message">Loading sessions...</div>
+      ) : error ? (
+        <div className="state-message state-error">{error}</div>
+      ) : sessions.length === 0 ? (
+        <div className="state-message">No sessions found.</div>
+      ) : (
+        <SessionsTable
+          sessions={sessions}
+          onEdit={openEditForm}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onDelete={handleDelete}
+        />
+      )}
+    </PageContainer>
   );
 }

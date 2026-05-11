@@ -1,4 +1,5 @@
-import "../../styles/filterbar.css";
+import { Box, Button, Card, NativeSelect } from "@mui/material";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 
 export default function PeopleFilterBar({
   onFilterStatus,
@@ -8,43 +9,53 @@ export default function PeopleFilterBar({
   onClear,
 }) {
   return (
-    <div className="filter-bar">
-      <div className="filter-bar-item">
-        <div className="filter-bar-item-left">
-          <img
-            src="/icons/filter.svg"
-            className="filter-bar-item-icon"
-            alt="filter"
-          />
+    <Box>
+      <Card
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          bgcolor: "white",
+          border: "1px solid #E5E7EB",
+          py: 1.5,
+          px: 1,
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center", px: 2 }}>
+          <FilterAltIcon sx={{ color: "primary.main" }} />
           <div>Filter by:</div>
-          <select
-            className="filter-bar-item-select"
+          <NativeSelect
+            sx={{
+              bgcolor: "background.paper",
+              minWidth: 120,
+            }}
             onChange={(e) => onFilterStatus(e.target.value)}
             value={filterStatus}
+            size="small"
           >
             <option value="">Status: All</option>
             <option value="0">Active</option>
             <option value="1">Inactive</option>
-          </select>
+          </NativeSelect>
 
           {/* sorting */}
           <div>Sort by:</div>
-          <select
-            className="filter-bar-item-select"
+          <NativeSelect
+            sx={{
+              bgcolor: "background.paper",
+              minWidth: 120,
+            }}
             onChange={(e) => onFilterName(e.target.value)}
             value={filterName}
           >
             <option value="">Default</option>
             <option value="asc">Name: A to Z</option>
             <option value="desc">Name: Z to A</option>
-          </select>
-        </div>
-        <div className="filter-bar-item-right">
-          <button className="filter-bar-item-button" onClick={onClear}>
-            Clear filters
-          </button>
-        </div>
-      </div>
-    </div>
+          </NativeSelect>
+        </Box>
+        <Box sx={{ alignItems: "center" }}>
+          <Button onClick={onClear}>Clear filters</Button>
+        </Box>
+      </Card>
+    </Box>
   );
 }
