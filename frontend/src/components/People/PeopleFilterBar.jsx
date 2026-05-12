@@ -36,21 +36,6 @@ export default function PeopleFilterBar({
             <option value="0">Active</option>
             <option value="1">Inactive</option>
           </NativeSelect>
-
-          {/* sorting */}
-          <div>Sort by:</div>
-          <NativeSelect
-            sx={{
-              bgcolor: "background.paper",
-              minWidth: 120,
-            }}
-            onChange={(e) => onFilterName(e.target.value)}
-            value={filterName}
-          >
-            <option value="">Default</option>
-            <option value="asc">Name: A to Z</option>
-            <option value="desc">Name: Z to A</option>
-          </NativeSelect>
         </Box>
         <Box sx={{ alignItems: "center" }}>
           <Button onClick={onClear}>Clear filters</Button>

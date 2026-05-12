@@ -26,10 +26,6 @@ import DeleteConfirm from "../../components/common/DeleteConfirm";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 5; // show 5 people on each page
 
   // pop-ups
   const [showAddForm, setShowAddForm] = useState(false);
@@ -73,7 +69,6 @@ export default function PeoplePage() {
 
   // filter
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterName, setFilterName] = useState("");
 
   // import people
   const fileInputRef = useRef(null);
@@ -144,8 +139,6 @@ export default function PeoplePage() {
   // filter clear
   const handleFilterClear = () => {
     setFilterStatus("");
-    setCurrentPage(1);
-    setFilterName("");
   };
 
   // fetch people
@@ -156,21 +149,19 @@ export default function PeoplePage() {
       setError("");
 
       const r = await apiFetch(
-        `/api/people?limit=${limit}&page=${currentPage}&role=${roleTab}&search=${search}&filterStatus=${filterStatus}&filterName=${filterName}`,
+        `/api/people/all?role=${roleTab}&search=${search}&filterStatus=${filterStatus}`,
       );
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
 
       // set data
       setPeople(data.data);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
     } catch (e) {
       console.error("fetch failed:", e);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, roleTab, search, filterStatus, filterName]);
+  }, [roleTab, search, filterStatus]);
 
   useEffect(() => {
     fetchPeople();
@@ -345,7 +336,6 @@ export default function PeoplePage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setCurrentPage(1);
               }}
             />
           </Box>
@@ -525,14 +515,8 @@ export default function PeoplePage() {
       <PeopleFilterBar
         onFilterStatus={(value) => {
           setFilterStatus(value);
-          setCurrentPage(1);
         }}
         filterStatus={filterStatus}
-        onFilterName={(value) => {
-          setFilterName(value);
-          setCurrentPage(1);
-        }}
-        filterName={filterName}
         onClear={handleFilterClear}
       ></PeopleFilterBar>
 
@@ -553,9 +537,6 @@ export default function PeoplePage() {
           people={people}
           onDelete={handleOpenDeleteConfirm}
           onEdit={openEditForm}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          setCurrentPage={setCurrentPage}
         ></PeopleTable>
       )}
     </PageContainer>
