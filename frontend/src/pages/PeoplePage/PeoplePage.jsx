@@ -382,38 +382,35 @@ export default function PeoplePage() {
                   minWidth: 400,
                 }}
               >
-                <Box>
-                  <TextField
-                    label="Name"
-                    type="text"
-                    value={name}
-                    required
-                    fullWidth
-                    variant="standard"
-                    onChange={(e) => setName(e.target.value)}
-                  ></TextField>
-                </Box>
-                <Box>
-                  <TextField
-                    label="Email"
-                    type="text"
-                    value={email}
-                    required
-                    fullWidth
-                    variant="standard"
-                    onChange={(e) => setEmail(e.target.value)}
-                  ></TextField>
-                </Box>
-                <Box>
-                  <TextField
-                    label="Phone"
-                    type="text"
-                    value={phone}
-                    fullWidth
-                    variant="standard"
-                    onChange={(e) => setPhone(e.target.value)}
-                  ></TextField>
-                </Box>
+                <TextField
+                  label="Name"
+                  type="text"
+                  value={name}
+                  required
+                  fullWidth
+                  variant="standard"
+                  onChange={(e) => setName(e.target.value)}
+                ></TextField>
+
+                <TextField
+                  label="Email"
+                  type="text"
+                  value={email}
+                  required
+                  fullWidth
+                  variant="standard"
+                  onChange={(e) => setEmail(e.target.value)}
+                ></TextField>
+
+                <TextField
+                  label="Phone"
+                  type="text"
+                  value={phone}
+                  fullWidth
+                  variant="standard"
+                  onChange={(e) => setPhone(e.target.value)}
+                ></TextField>
+
                 {/* show status only in edit mode */}
                 {isEditMode && (
                   <FormControl>

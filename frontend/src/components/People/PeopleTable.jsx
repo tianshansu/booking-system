@@ -88,8 +88,6 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
         columns={columns}
         initialState={{ pagination: { paginationModel } }}
         pageSizeOptions={[5, 10]}
-        checkboxSelection
-        disableRowSelectionOnClick
         sx={{
           border: 0,
           "& .MuiDataGrid-cell": {

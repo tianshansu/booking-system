@@ -1,4 +1,3 @@
-import "./SessionsPage.css";
 import "../../styles/form.css";
 import "../../styles/popups.css";
 import "../../styles/stateMsg.css";
@@ -8,6 +7,30 @@ import Searchbar from "../../components/common/Searchbar";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 import PageContainer from "../../components/common/PageContainer";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import AddIcon from "@mui/icons-material/Add";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  InputLabel,
+  NativeSelect,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import dayjs from "dayjs";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
@@ -25,8 +48,8 @@ export default function SessionsPage() {
   const [patientId, setPatientId] = useState("");
   const [staffId, setStaffId] = useState("");
   const [status, setStatus] = useState(0);
-  const [startAt, setStartAt] = useState("");
-  const [endAt, setEndAt] = useState("");
+  const [startAt, setStartAt] = useState(null);
+  const [endAt, setEndAt] = useState(null);
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,8 +136,8 @@ export default function SessionsPage() {
     setPatientId("");
     setStaffId("");
     setStatus(0);
-    setStartAt("");
-    setEndAt("");
+    setStartAt(null);
+    setEndAt(null);
 
     setShowForm(true);
   };
@@ -130,8 +153,8 @@ export default function SessionsPage() {
     setPatientId(session.patientId);
     setStaffId(session.staffId);
     setStatus(session.status);
-    setStartAt(session.startAt);
-    setEndAt(session.endAt);
+    setStartAt(session.startAt ? dayjs(session.startAt) : null);
+    setEndAt(session.endAt ? dayjs(session.endAt) : null);
 
     setShowForm(true);
   };
@@ -257,10 +280,26 @@ export default function SessionsPage() {
 
   return (
     <PageContainer>
-      <div className="sessions-header">
-        <div className="sessions-header-element">
-          <div>View and manage all sessions in the system.</div>
-          <div className="sessions-search-filter">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gap: "10px",
+          }}
+        >
+          <Typography>View and manage all sessions in the system.</Typography>
+          <Box
+            sx={{
+              display: "flex",
+              gap: "10px",
+            }}
+          >
             <Searchbar
               placeholder="Session name, patient or staff name"
               value={search}
@@ -269,154 +308,194 @@ export default function SessionsPage() {
                 setCurrentPage(1);
               }}
             />
-          </div>
-        </div>
-        <div className="sessions-header-buttons">
-          <button
-            className="sessions-header-button"
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="outlined"
+            sx={{ height: 40 }}
             type="button"
             onClick={handleExport}
           >
-            <img
-              className="sessions-header-button-img"
-              src="/icons/import.svg"
-              alt="import icon"
-            ></img>
-            <div className="sessions-header-button-text">Export</div>
-          </button>
+            <FileDownloadIcon />
+            <Typography>Download</Typography>
+          </Button>
 
-          <div className="sessions-header-buttons">
-            <button
-              className="sessions-header-button"
-              style={{ backgroundColor: "#4338CA", border: "none" }}
+          <Box>
+            <Button
+              variant="contained"
+              sx={{ height: 40 }}
               type="button"
               onClick={openAddForm}
             >
-              <img
-                className="sessions-header-button-img"
-                src="/icons/add.svg"
-                alt="add session"
-              ></img>
-              <div
-                className="sessions-header-button-text"
-                style={{ color: "white" }}
-              >
-                Add session
-              </div>
-            </button>
+              <AddIcon />
+              <Typography>Add session</Typography>
+            </Button>
 
             {/* add session form */}
-            {showForm && (
-              <div className="app-modal">
-                <div className="app-form-title">{formTitle}</div>
-                <form onSubmit={handleSubmit}>
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">Name:</div>
-                    <input
-                      className="app-form-input-row-value"
-                      type="text"
-                      placeholder="Session Name"
-                      value={sessionName}
-                      onChange={(e) => setSessionName(e.target.value)}
-                    ></input>
-                  </div>
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">Patient:</div>
-                    <select
-                      className="app-form-input-row-value"
-                      onChange={(e) => setPatientId(e.target.value)}
-                      value={patientId}
-                    >
-                      <option>Please select a patient</option>
-                      {patientsOptions.map((patient) => (
-                        <option key={patient.id} value={patient.id}>
-                          {patient.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">Staff:</div>
-                    <select
-                      className="app-form-input-row-value"
-                      onChange={(e) => setStaffId(e.target.value)}
-                      value={staffId}
-                    >
-                      <option>Please select a staff</option>
-                      {staffOptions.map((staff) => (
-                        <option key={staff.id} value={staff.id}>
-                          {staff.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+            <Dialog open={showForm} onClose={() => setShowForm(false)}>
+              <DialogTitle>{formTitle}</DialogTitle>
+              <DialogContent>
+                <Box
+                  component="form"
+                  onSubmit={handleSubmit}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    minWidth: 400,
+                  }}
+                >
+                  <TextField
+                    label="Session Name"
+                    type="text"
+                    value={sessionName}
+                    required
+                    fullWidth
+                    variant="standard"
+                    onChange={(e) => setSessionName(e.target.value)}
+                  ></TextField>
+
+                  {/* patient name selection */}
+                  <Autocomplete
+                    disablePortal
+                    options={patientsOptions}
+                    onChange={(event, newValue) => {
+                      setPatientId(newValue ? newValue.id : "");
+                    }}
+                    value={
+                      patientsOptions.find(
+                        (patient) => patient.id === patientId,
+                      ) || null
+                    }
+                    sx={{ width: "100% " }}
+                    getOptionLabel={(patient) => patient.name}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Patient Name"
+                        variant="standard"
+                      />
+                    )}
+                  />
+
+                  {/* staff name selection */}
+                  <Autocomplete
+                    disablePortal
+                    options={staffOptions}
+                    onChange={(event, newValue) => {
+                      setStaffId(newValue ? newValue.id : "");
+                    }}
+                    value={
+                      staffOptions.find((staff) => staff.id === staffId) || null
+                    }
+                    sx={{ width: "100%" }}
+                    getOptionLabel={(staff) => staff.name}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Staff Name"
+                        variant="standard"
+                      />
+                    )}
+                  />
+
                   {/* show status */}
                   {isEditMode && (
-                    <div className="app-form-input-row">
-                      <div className="app-form-input-row-label">Status:</div>
-                      <div className="app-form-input-row-value">
-                        <label>
-                          <input
-                            type="radio"
-                            name="status"
-                            value={0}
-                            checked={status === 0}
-                            onChange={() => setStatus(0)}
-                          ></input>
-                          Scheduled
-                        </label>
-                        <label>
-                          <input
-                            type="radio"
-                            name="status"
-                            value={1}
-                            checked={status === 1}
-                            onChange={() => setStatus(1)}
-                          ></input>
-                          Completed
-                        </label>
-                        <label>
-                          <input
-                            type="radio"
-                            name="status"
-                            value={2}
-                            checked={status === 2}
-                            onChange={() => setStatus(2)}
-                          ></input>
-                          Canceled
-                        </label>
-                      </div>
-                    </div>
+                    <FormControl>
+                      <FormLabel>Status:</FormLabel>
+                      <RadioGroup row>
+                        <FormControlLabel
+                          control={<Radio />}
+                          label="Scheduled"
+                          value={0}
+                          checked={status === 0}
+                          onChange={() => setStatus(0)}
+                        />
+
+                        <FormControlLabel
+                          control={<Radio />}
+                          label="Completed"
+                          value={1}
+                          checked={status === 1}
+                          onChange={() => setStatus(1)}
+                        />
+
+                        <FormControlLabel
+                          control={<Radio />}
+                          label="Canceled"
+                          value={2}
+                          checked={status === 2}
+                          onChange={() => setStatus(2)}
+                        />
+                      </RadioGroup>
+                    </FormControl>
                   )}
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">Start At:</div>
-                    <input
-                      type="datetime-local"
-                      onChange={(e) => setStartAt(e.target.value)}
-                      value={startAt}
-                    ></input>
-                  </div>
-                  <div className="app-form-input-row">
-                    <div className="app-form-input-row-label">End At:</div>
-                    <input
-                      type="datetime-local"
-                      onChange={(e) => setEndAt(e.target.value)}
-                      value={endAt}
-                    ></input>
-                  </div>
-                  <div className="app-form-buttons">
-                    <button type="button" onClick={() => setShowForm(false)}>
+
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DateTimePicker"]}>
+                      <DateTimePicker
+                        label="Start At"
+                        value={startAt}
+                        onChange={(newValue) => setStartAt(newValue)}
+                        slotProps={{
+                          textField: {
+                            variant: "standard",
+                            fullWidth: true,
+                          },
+                        }}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DateTimePicker"]}>
+                      <DateTimePicker
+                        label="End At"
+                        value={endAt}
+                        onChange={(newValue) => setEndAt(newValue)}
+                        slotProps={{
+                          textField: {
+                            variant: "standard",
+                            fullWidth: true,
+                          },
+                        }}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 2,
+                      mt: 3,
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      onClick={() => setShowForm(false)}
+                      type="button"
+                    >
                       Cancel
-                    </button>
-                    <button type="submit">Submit</button>
-                  </div>
-                </form>
-              </div>
-            )}
+                    </Button>
+                    <Button variant="contained" type="submit">
+                      Submit
+                    </Button>
+                  </Box>
+                </Box>
+              </DialogContent>
+            </Dialog>
+
             {showMsg && <div className="toast-message">{msg}</div>}
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
       <SessionsFilterBar
         onFilterStatus={(value) => {
           setFilterStatus(value);
