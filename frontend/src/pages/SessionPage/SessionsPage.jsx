@@ -19,8 +19,6 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  InputLabel,
-  NativeSelect,
   Radio,
   RadioGroup,
   TextField,
