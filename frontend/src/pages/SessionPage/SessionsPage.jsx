@@ -3,7 +3,7 @@ import "../../styles/popups.css";
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
 import Searchbar from "../../components/common/Searchbar";
-import { use, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 import PageContainer from "../../components/common/PageContainer";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
