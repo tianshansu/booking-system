@@ -1,8 +1,5 @@
-import "../../styles/popups.css";
-import "../../styles/stateMsg.css";
 import PeopleTable from "../../components/People/PeopleTable";
 import Searchbar from "../../components/common/Searchbar";
-import DeleteConfirm from "../../components/common/DeleteConfirm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../api";
 import PeopleFilterBar from "../../components/People/PeopleFilterBar";
@@ -24,6 +21,8 @@ import {
 } from "@mui/material";
 import PublishIcon from "@mui/icons-material/Publish";
 import AddIcon from "@mui/icons-material/Add";
+import ToastMessage from "../../components/common/ToastMessage";
+import DeleteConfirm from "../../components/common/DeleteConfirm";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
@@ -34,9 +33,20 @@ export default function PeoplePage() {
 
   // pop-ups
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showMsg, setShowMsg] = useState(false);
-  const [msg, setMsg] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
+
+  const closeToast = () => {
+    setToast({
+      ...toast,
+      open: false,
+    });
+  };
 
   // people fields
   const [name, setName] = useState("");
@@ -99,25 +109,20 @@ export default function PeoplePage() {
         throw new Error(data.error || "Import failed");
       }
 
-      setMsg(
-        `Import completed: ${data.insertedCount} inserted, ${data.failedCount} failed`,
-      );
-      setShowMsg(true);
-
-      setTimeout(() => {
-        setShowMsg(false);
-      }, 2000);
+      setToast({
+        open: true,
+        message: `Import completed: ${data.insertedCount} inserted, ${data.failedCount} failed`,
+        type: "success",
+      });
 
       // refresh people list
       fetchPeople();
     } catch (err) {
-      console.error("Import people error:", err);
-      setMsg("Failed to import people");
-      setShowMsg(true);
-
-      setTimeout(() => {
-        setShowMsg(false);
-      }, 2000);
+      setToast({
+        open: true,
+        message: "Failed to import people",
+        type: "error",
+      });
     }
 
     // clear input value so same file can be selected again
@@ -211,27 +216,35 @@ export default function PeoplePage() {
     // set msg
     if (response.ok) {
       isEditMode
-        ? setMsg("Person edited successfully")
-        : setMsg("Person added successfully");
+        ? setToast({
+            open: true,
+            message: "Person edited successfully",
+            type: "success",
+          })
+        : setToast({
+            open: true,
+            message: "Person added successfully",
+            type: "success",
+          });
     } else {
       isEditMode
-        ? setMsg("Failed to edit person")
-        : setMsg("Failed to add person");
+        ? setToast({
+            open: true,
+            message: "Failed to edit person",
+            type: "error",
+          })
+        : setToast({
+            open: true,
+            message: "Failed to add person",
+            type: "error",
+          });
     }
 
     // refresh people list
     await fetchPeople();
 
-    setShowMsg(true);
-
-    setTimeout(() => {
-      setShowMsg(false);
-    }, 1000);
-
     //close the form
     setShowAddForm(false);
-
-    //show msg
   };
 
   const handleDelete = async () => {
@@ -247,21 +260,32 @@ export default function PeoplePage() {
     if (response.ok) {
       await fetchPeople();
       roleTab === "patient"
-        ? setMsg("Patient deleted successfully")
-        : setMsg("Staff deleted successfully");
+        ? setToast({
+            open: true,
+            message: "Patient deleted successfully",
+            type: "success",
+          })
+        : setToast({
+            open: true,
+            message: "Staff deleted successfully",
+            type: "success",
+          });
       setShowDeleteConfirm(false);
     } else {
       roleTab === "patient"
-        ? setMsg("Failed to delete patient")
-        : setMsg("Failed to delete staff");
+        ? setToast({
+            open: true,
+            message: "Failed to delete patient",
+            type: "error",
+          })
+        : setToast({
+            open: true,
+            message: "Failed to delete staff",
+            type: "error",
+          });
       setShowDeleteConfirm(false);
       setSelectedPerson(null);
     }
-    setShowMsg(true);
-
-    setTimeout(() => {
-      setShowMsg(false);
-    }, 1000);
   };
 
   const openAddForm = () => {
@@ -479,13 +503,21 @@ export default function PeoplePage() {
             </DialogContent>
           </Dialog>
 
-          {showMsg && <div className="toast-message">{msg}</div>}
-          {showDeleteConfirm && (
+          {/* {showMsg && <div className="toast-message">{msg}</div>} */}
+
+          <ToastMessage
+            open={toast.open}
+            message={toast.message}
+            type={toast.type}
+            onClose={closeToast}
+          />
+          {showDeleteConfirm && selectedPerson && (
             <DeleteConfirm
+              open={showDeleteConfirm}
               text={`Are you sure you want to delete ${selectedPerson.name}? This will also delete all related sessions.`}
               onCancel={handleCancelDelete}
               onConfirm={handleDelete}
-            ></DeleteConfirm>
+            />
           )}
         </Box>
       </Box>
@@ -505,14 +537,19 @@ export default function PeoplePage() {
       ></PeopleFilterBar>
 
       {loading ? (
-        <div className="state-message">Loading people...</div>
+        <Box sx={{ py: 4, textAlign: "center", color: "text.secondary" }}>
+          Loading people...
+        </Box>
       ) : error ? (
-        <div className="state-message state-error">{error}</div>
+        <Box sx={{ py: 4, textAlign: "center", color: "error.main" }}>
+          {error}
+        </Box>
       ) : people.length === 0 ? (
-        <div className="state-message">No people found.</div>
+        <Box sx={{ py: 4, textAlign: "center", color: "text.secondary" }}>
+          No people found.
+        </Box>
       ) : (
         <PeopleTable
-          className="people-table"
           people={people}
           onDelete={handleOpenDeleteConfirm}
           onEdit={openEditForm}
