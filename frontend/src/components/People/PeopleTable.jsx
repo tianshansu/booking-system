@@ -1,6 +1,5 @@
 import { DataGrid } from "@mui/x-data-grid";
-import Paper from "@mui/material/Paper";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Card } from "@mui/material";
 import { useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -13,9 +12,9 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
 
   const columns = [
     { field: "name", headerName: "NAME", flex: 1 },
-    { field: "email", headerName: "EMAIL", flex: 1 },
+    { field: "email", headerName: "EMAIL", flex: 1.7 },
     { field: "phone", headerName: "PHONE", flex: 1 },
-    { field: "status", headerName: "STATUS", flex: 1 },
+    { field: "status", headerName: "STATUS", flex: 0.8 },
     { field: "lastSession", headerName: "LAST SESSION", flex: 1 },
     {
       field: "notes",
@@ -82,7 +81,7 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
   const paginationModel = { page: 0, pageSize: 5 };
 
   return (
-    <Paper sx={{ height: 400, width: "100%" }}>
+    <Card sx={{ height: 400, width: "100%", px: 2 }}>
       <DataGrid
         rows={people}
         columns={columns}
@@ -122,6 +121,6 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
           </Typography>
         </DialogContent>
       </Dialog>
-    </Paper>
+    </Card>
   );
 }

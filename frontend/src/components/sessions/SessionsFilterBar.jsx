@@ -47,17 +47,6 @@ export default function SessionsFilterBar({
               </option>
             ))}
           </NativeSelect>
-
-          {/* sorting */}
-          <div>Sort by:</div>
-          <NativeSelect
-            onChange={(e) => onFilterSortTime(e.target.value)}
-            value={filterSortTime}
-          >
-            <option value="">Default</option>
-            <option value="desc">Newest</option>
-            <option value="asc">Oldest</option>
-          </NativeSelect>
         </Box>
         <Box>
           <Button onClick={onClear}>Clear filters</Button>

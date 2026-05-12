@@ -1,87 +1,95 @@
-import "./SessionsTable.css";
-import SessionsRow from "./SessionsRow";
-// import { sessions } from "../../data/mockSessions";
+import { DataGrid } from "@mui/x-data-grid";
+import { Box, Button, Card } from "@mui/material";
 
-export default function SessionsTable({
-  sessions,
-  onEdit,
-  setCurrentPage,
-  currentPage,
-  totalPages,
-  onDelete,
-}) {
+export default function SessionsTable({ sessions, onEdit, onDelete }) {
+  const columns = [
+    { field: "name", headerName: "SESSION", flex: 1.5 },
+    { field: "patientName", headerName: "PATIENT", flex: 1 },
+    { field: "staff", headerName: "STAFF", flex: 1 },
+    {
+      field: "status",
+      headerName: "STATUS",
+      flex: 0.8,
+      valueFormatter: (value) => {
+        if (value === 0) return "Scheduled";
+        if (value === 1) return "Completed";
+        if (value === 2) return "Canceled";
+        return "";
+      },
+    },
+    { field: "date", headerName: "DATE", flex: 1 },
+    { field: "time", headerName: "TIME", flex: 1 },
+    { field: "duration", headerName: "DURATION", flex: 0.8 },
+    {
+      field: "actions",
+      headerName: "ACTIONS",
+      flex: 1,
+      minWidth: 160,
+      sortable: false,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => onEdit(params.row)}
+          >
+            Edit
+          </Button>
+
+          <Button
+            size="small"
+            color="error"
+            variant="outlined"
+            onClick={() => onDelete(params.row)}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
+    },
+  ];
+
+  const paginationModel = { page: 0, pageSize: 5 };
+
   return (
-    <div className="sessions-table">
-      <table className="sessions-table-table">
-        <thead>
-          <tr>
-            {/* <th scope="col" className="sessions-table-table-header">
-              <input type="checkbox"></input>
-            </th> */}
-            <th scope="col" className="sessions-table-table-header">
-              SESSION
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              PATIENT
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              STAFF
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              STATUS
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              DATE
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              TIME
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              DURATION
-            </th>
-            <th scope="col" className="sessions-table-table-header">
-              ACTIONS
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sessions.map((session) => (
-            <SessionsRow
-              key={session.id}
-              session={session}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan={9} className="sessions-table-table-footer">
-              <div className="sessions-table-table-footer-content">
-                Showing page {currentPage} of {totalPages} pages
-                <div className="sessions-table-table-footer-buttons">
-                  <button
-                    type="button"
-                    className="sessions-table-table-footer-button"
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    className="sessions-table-table-footer-button"
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+    <Card sx={{ height: 400, width: "100%", px: 2 }}>
+      <DataGrid
+        rows={sessions}
+        columns={columns}
+        initialState={{ pagination: { paginationModel } }}
+        pageSizeOptions={[5, 10]}
+        sx={{
+          border: 0,
+          "& .MuiDataGrid-cell": {
+            display: "flex",
+            alignItems: "center",
+          },
+
+          "& .MuiDataGrid-cell:focus": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-cell:focus-within": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-columnHeader:focus": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-columnHeader:focus-within": {
+            outline: "none",
+          },
+        }}
+      />
+    </Card>
   );
 }

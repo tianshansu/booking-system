@@ -1,10 +1,9 @@
-import "../../styles/form.css";
 import "../../styles/popups.css";
-import "../../styles/stateMsg.css";
+
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
 import Searchbar from "../../components/common/Searchbar";
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api";
 import PageContainer from "../../components/common/PageContainer";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -29,6 +28,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
+import DeleteConfirm from "../../components/common/DeleteConfirm";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
@@ -49,11 +49,6 @@ export default function SessionsPage() {
   const [startAt, setStartAt] = useState(null);
   const [endAt, setEndAt] = useState(null);
 
-  // pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 5;
-
   // search bar
   const [search, setSearch] = useState("");
 
@@ -66,6 +61,10 @@ export default function SessionsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // delete confirm
+  const [selectedSession, setSelectedSession] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const fetchSessions = useCallback(async () => {
     try {
       // set is loading
@@ -73,7 +72,7 @@ export default function SessionsPage() {
       setError("");
 
       const r = await apiFetch(
-        `/api/sessions?limit=${limit}&page=${currentPage}&status=${filterStatus}&staffId=${filterStaffId}&search=${search}&sortTime=${filterSortTime}`,
+        `/api/sessions/all?status=${filterStatus}&staffId=${filterStaffId}&search=${search}&sortTime=${filterSortTime}`,
       );
 
       if (!r.ok) {
@@ -83,16 +82,14 @@ export default function SessionsPage() {
       const data = await r.json();
 
       setSessions(data.data || []);
-      setTotalPages(data.totalPages || 1);
     } catch (e) {
       console.error("fetch failed:", e);
       setError("Failed to load sessions.");
       setSessions([]);
-      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  }, [limit, currentPage, filterStatus, filterStaffId, search, filterSortTime]);
+  }, [filterStatus, filterStaffId, search, filterSortTime]);
 
   // export to csv
   const handleExport = async () => {
@@ -219,6 +216,18 @@ export default function SessionsPage() {
     setShowForm(false);
   };
 
+  // handle delete confirm
+  const handleOpenDeleteConfirm = (session) => {
+    setSelectedSession(session);
+    setShowDeleteConfirm(true);
+  };
+
+  // handle delete cancel
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setSelectedSession(null);
+  };
+
   // delete a session
   const handleDelete = async (sessionId) => {
     const response = await apiFetch(`/api/sessions/${sessionId}`, {
@@ -238,17 +247,15 @@ export default function SessionsPage() {
     //refresh
     await fetchSessions();
 
-    setShowMsg(true);
-    setTimeout(() => {
-      setShowMsg(false);
-    }, 1000);
+    setShowDeleteConfirm(false);
+    setSelectedSession(null);
   };
 
   // filter clear
   const handleFilterClear = () => {
     setFilterStatus("");
     setFilterStaffId("");
-    setCurrentPage(1);
+
     setFilterSortTime("");
   };
 
@@ -303,7 +310,6 @@ export default function SessionsPage() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                setCurrentPage(1);
               }}
             />
           </Box>
@@ -491,18 +497,24 @@ export default function SessionsPage() {
             </Dialog>
 
             {showMsg && <div className="toast-message">{msg}</div>}
+            {showDeleteConfirm && selectedSession && (
+              <DeleteConfirm
+                open={showDeleteConfirm}
+                text={`Are you sure you want to delete ${selectedSession.name}?`}
+                onCancel={handleCancelDelete}
+                onConfirm={() => handleDelete(selectedSession.id)}
+              />
+            )}
           </Box>
         </Box>
       </Box>
       <SessionsFilterBar
         onFilterStatus={(value) => {
           setFilterStatus(value);
-          setCurrentPage(1);
         }}
         filterStatus={filterStatus}
         onFilterStaff={(value) => {
           setFilterStaffId(value);
-          setCurrentPage(1);
         }}
         filterStaff={filterStaffId}
         onFilterSortTime={(value) => setFilterSortTime(value)}
@@ -520,10 +532,7 @@ export default function SessionsPage() {
         <SessionsTable
           sessions={sessions}
           onEdit={openEditForm}
-          setCurrentPage={setCurrentPage}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onDelete={handleDelete}
+          onDelete={handleOpenDeleteConfirm}
         />
       )}
     </PageContainer>
