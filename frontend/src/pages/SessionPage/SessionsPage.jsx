@@ -1,5 +1,3 @@
-import "../../styles/popups.css";
-
 import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
 import SessionsTable from "../../components/sessions/SessionsTable";
 import Searchbar from "../../components/common/Searchbar";

@@ -1,5 +1,3 @@
-import "../../styles/popups.css";
-import "../../styles/form.css";
 import SummaryCard from "../../components/common/SummaryCard";
 import ListPanel from "../../components/common/ListPanel";
 import TodaySessionList from "../../components/dashboard/TodaySessionList";
@@ -14,6 +12,7 @@ import { apiFetch } from "../../api";
 import AiAssistant from "../../components/aiAssistant/AiAssistant";
 import { Box, Button, Card, CardContent } from "@mui/material";
 import PageContainer from "../../components/common/PageContainer";
+import ToastMessage from "../../components/common/ToastMessage";
 
 export default function DashboardPage() {
   const [todaySessions, setTodaySessions] = useState([]);
@@ -38,19 +37,21 @@ export default function DashboardPage() {
   const upcomingPreview = upcomingSessions.slice(0, 4); //take top 4 records to display
 
   // pop-ups
-  const [showMsg, setShowMsg] = useState(false);
-  const [msg, setMsg] = useState("");
   const [showAllTodaySessions, setShowAllTodaySessions] = useState(false);
   const [showAllUpcomingSessions, setShowAllUpcomingSessions] = useState(false);
 
-  const showMessage = (text) => {
-    setMsg(text);
+  // toast msg
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
 
-    setShowMsg(true);
-
-    setTimeout(() => {
-      setShowMsg(false);
-    }, 1000);
+  const closeToast = () => {
+    setToast({
+      ...toast,
+      open: false,
+    });
   };
 
   const SESSION_STATUS = {
@@ -109,10 +110,19 @@ export default function DashboardPage() {
       fetchSessions();
       fetchSummary();
       fetchRecentActivity();
-      showMessage("session successfully marked as completed");
+
+      setToast({
+        open: true,
+        message: "Session successfully marked as completed",
+        type: "success",
+      });
     } catch (err) {
       console.error("Mark complete error:", err);
-      showMessage("session is unable to mark as completed, please try again");
+      setToast({
+        open: true,
+        message: "Session is unable to mark as completed, please try again",
+        type: "error",
+      });
     }
   };
 
@@ -122,10 +132,20 @@ export default function DashboardPage() {
       fetchSessions();
       fetchSummary();
       fetchRecentActivity();
-      showMessage("session successfully marked as canceled");
+
+      setToast({
+        open: true,
+        message: "Session successfully marked as canceled",
+        type: "success",
+      });
     } catch (err) {
       console.error("Mark complete error:", err);
-      showMessage("session is unable to mark as canceled, please try again");
+
+      setToast({
+        open: true,
+        message: "Session is unable to mark as canceled, please try again",
+        type: "error",
+      });
     }
   };
 
@@ -234,7 +254,6 @@ export default function DashboardPage() {
       </Box>
 
       {/* pop ups & overlays */}
-      {showMsg && <div className="toast-message">{msg}</div>}
       {showAllTodaySessions && (
         <OverlayModal
           open={showAllTodaySessions}
@@ -279,6 +298,12 @@ export default function DashboardPage() {
         </Card>
       </Box>
       <AiAssistant></AiAssistant>
+      <ToastMessage
+        open={toast.open}
+        message={toast.message}
+        type={toast.type}
+        onClose={closeToast}
+      />
     </PageContainer>
   );
 }

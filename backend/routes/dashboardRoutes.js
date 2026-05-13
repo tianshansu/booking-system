@@ -138,7 +138,8 @@ router.get("/sessions", async (req, res) => {
       JOIN people staff ON s.staff_id = staff.id
       WHERE s.start_at::date > CURRENT_DATE 
         AND s.start_at::date <= CURRENT_DATE + INTERVAL '7 days'
-        AND s.status = 0 ;
+        AND s.status = 0
+      ORDER BY date, time ASC;
     `;
 
     const { rows: upcomingRows } = await pool.query(upcomingSql);

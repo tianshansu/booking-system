@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../../styles/popups.css";
 import { Box, Button, IconButton, ListItem } from "@mui/material";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
