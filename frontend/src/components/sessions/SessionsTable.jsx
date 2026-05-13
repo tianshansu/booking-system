@@ -75,6 +75,9 @@ export default function SessionsTable({ sessions, onEdit, onDelete }) {
             display: "flex",
             alignItems: "center",
           },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            fontWeight: 600,
+          },
 
           "& .MuiDataGrid-cell:focus": {
             outline: "none",

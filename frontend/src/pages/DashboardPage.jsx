@@ -1,18 +1,18 @@
-import SummaryCard from "../../components/common/SummaryCard";
-import ListPanel from "../../components/common/ListPanel";
-import TodaySessionList from "../../components/dashboard/TodaySessionList";
-import UpcomingSessionList from "../../components/dashboard/UpcomingSessionList";
-import TodaySessionRow from "../../components/dashboard/TodaySessionRow";
-import UpcomingSessionRow from "../../components/dashboard/UpcomingSessionRow";
-import RecentActivityList from "../../components/dashboard/RecentActivityList";
-import RecentActivityListRow from "../../components/dashboard/RecentActivityListRow";
-import OverlayModal from "../../components/common/OverlayModal";
+import SummaryCard from "../components/common/SummaryCard";
+import ListPanel from "../components/common/ListPanel";
+import TodaySessionList from "../components/dashboard/TodaySessionList";
+import UpcomingSessionList from "../components/dashboard/UpcomingSessionList";
+import TodaySessionRow from "../components/dashboard/TodaySessionRow";
+import UpcomingSessionRow from "../components/dashboard/UpcomingSessionRow";
+import RecentActivityList from "../components/dashboard/RecentActivityList";
+import RecentActivityListRow from "../components/dashboard/RecentActivityListRow";
+import OverlayModal from "../components/common/OverlayModal";
 import { useEffect, useState } from "react";
-import { apiFetch } from "../../api";
-import AiAssistant from "../../components/aiAssistant/AiAssistant";
+import { apiFetch } from "../api";
+import AiAssistant from "../components/aiAssistant/AiAssistant";
 import { Box, Button, Card, CardContent } from "@mui/material";
-import PageContainer from "../../components/common/PageContainer";
-import ToastMessage from "../../components/common/ToastMessage";
+import PageContainer from "../components/common/PageContainer";
+import ToastMessage from "../components/common/ToastMessage";
 
 export default function DashboardPage() {
   const [todaySessions, setTodaySessions] = useState([]);

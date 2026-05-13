@@ -1,9 +1,9 @@
-import PeopleTable from "../../components/People/PeopleTable";
-import Searchbar from "../../components/common/Searchbar";
+import PeopleTable from "../components/People/PeopleTable";
+import Searchbar from "../components/common/Searchbar";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { apiFetch } from "../../api";
-import PeopleFilterBar from "../../components/People/PeopleFilterBar";
-import PageContainer from "../../components/common/PageContainer";
+import { apiFetch } from "../api";
+import PeopleFilterBar from "../components/People/PeopleFilterBar";
+import PageContainer from "../components/common/PageContainer";
 import {
   Box,
   Button,
@@ -21,8 +21,8 @@ import {
 } from "@mui/material";
 import PublishIcon from "@mui/icons-material/Publish";
 import AddIcon from "@mui/icons-material/Add";
-import ToastMessage from "../../components/common/ToastMessage";
-import DeleteConfirm from "../../components/common/DeleteConfirm";
+import ToastMessage from "../components/common/ToastMessage";
+import DeleteConfirm from "../components/common/DeleteConfirm";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);

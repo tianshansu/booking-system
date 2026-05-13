@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { apiFetch } from "../../api";
-import PageContainer from "../../components/common/PageContainer";
+import { apiFetch } from "../api";
+import PageContainer from "../components/common/PageContainer";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Box, Button, Card, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import ToastMessage from "../../components/common/ToastMessage";
+import ToastMessage from "../components/common/ToastMessage";
 
 export default function SettingsPage() {
   const [email, setEmail] = useState("");

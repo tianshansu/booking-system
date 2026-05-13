@@ -44,6 +44,7 @@ const theme = createTheme({
       fontSize: "14px",
       fontWeight: 400,
       lineHeight: 1.5,
+      color: "#636E72",
     },
 
     button: {

@@ -41,18 +41,25 @@ const footerNavItems = [
     path: "/settings",
     icon: <SettingsIcon />,
   },
+  {
+    label: "Help",
+    path: "/help",
+    icon: <HelpIcon />,
+  },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ drawerWidth }) {
   return (
     <Box
       component="nav"
       sx={{
+        width: drawerWidth,
         height: "100vh",
         bgcolor: "background.paper",
         borderRight: "1px solid #E5E7EB",
         display: "flex",
         flexDirection: "column",
+        position: "fixed",
       }}
     >
       {/* Sidebar title */}
@@ -178,31 +185,6 @@ export default function Sidebar() {
             <ListItemText primary={item.label} />
           </ListItemButton>
         ))}
-
-        <ListItemButton
-          sx={{
-            borderRadius: 2,
-            color: "text.secondary",
-
-            "& .MuiListItemIcon-root": {
-              color: "text.secondary",
-            },
-
-            "&:hover": {
-              bgcolor: "primary.light",
-              color: "white",
-
-              "& .MuiListItemIcon-root": {
-                color: "white",
-              },
-            },
-          }}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>
-            <HelpIcon />
-          </ListItemIcon>
-          <ListItemText primary="Help" />
-        </ListItemButton>
       </List>
     </Box>
   );

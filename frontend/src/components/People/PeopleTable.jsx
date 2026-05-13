@@ -93,6 +93,9 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
             display: "flex",
             alignItems: "center",
           },
+          "& .MuiDataGrid-columnHeaderTitle": {
+            fontWeight: 600,
+          },
 
           "& .MuiDataGrid-cell:focus": {
             outline: "none",

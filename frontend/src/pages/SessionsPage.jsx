@@ -1,9 +1,9 @@
-import SessionsFilterBar from "../../components/sessions/SessionsFilterBar";
-import SessionsTable from "../../components/sessions/SessionsTable";
-import Searchbar from "../../components/common/Searchbar";
+import SessionsFilterBar from "../components/sessions/SessionsFilterBar";
+import SessionsTable from "../components/sessions/SessionsTable";
+import Searchbar from "../components/common/Searchbar";
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch } from "../../api";
-import PageContainer from "../../components/common/PageContainer";
+import { apiFetch } from "../api";
+import PageContainer from "../components/common/PageContainer";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import AddIcon from "@mui/icons-material/Add";
 import {
@@ -26,8 +26,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
-import DeleteConfirm from "../../components/common/DeleteConfirm";
-import ToastMessage from "../../components/common/ToastMessage";
+import DeleteConfirm from "../components/common/DeleteConfirm";
+import ToastMessage from "../components/common/ToastMessage";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);

@@ -6,6 +6,7 @@ const TITLE_MAP = {
   "/people": "People",
   "/sessions": "Sessions",
   "/settings": "Settings",
+  "/help": "Help & Support",
 };
 
 const SUBTITLE_MAP = {
@@ -13,6 +14,8 @@ const SUBTITLE_MAP = {
   "/people": "Manage clients and records",
   "/sessions": "Manage sessions",
   "/settings": "Manage your account",
+  "/help":
+    "Find answers to common questions or get in touch with our support team",
 };
 
 export default function HeaderBar() {
@@ -30,6 +33,7 @@ export default function HeaderBar() {
         bgcolor: "background.paper",
         color: "text.primary",
         borderBottom: "1px solid #E5E7EB",
+        py: 1,
       }}
     >
       <Toolbar
