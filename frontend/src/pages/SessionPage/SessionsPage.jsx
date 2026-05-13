@@ -29,14 +29,13 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import DeleteConfirm from "../../components/common/DeleteConfirm";
+import ToastMessage from "../../components/common/ToastMessage";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingSessionId, setEditingSessionId] = useState(null);
-  const [showMsg, setShowMsg] = useState(false);
-  const [msg, setMsg] = useState("");
 
   // form contents
   const [formTitle, setFormTitle] = useState("");
@@ -64,6 +63,20 @@ export default function SessionsPage() {
   // delete confirm
   const [selectedSession, setSelectedSession] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // toast msg
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
+
+  const closeToast = () => {
+    setToast({
+      ...toast,
+      open: false,
+    });
+  };
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -115,11 +128,11 @@ export default function SessionsPage() {
 
     window.URL.revokeObjectURL(url);
 
-    setMsg("Sessions exported successfully");
-    setShowMsg(true);
-    setTimeout(() => {
-      setShowMsg(false);
-    }, 1000);
+    setToast({
+      open: true,
+      message: "Sessions exported successfully",
+      type: "success",
+    });
   };
 
   // open add session form
@@ -196,21 +209,32 @@ export default function SessionsPage() {
 
     if (response.ok) {
       isEditMode
-        ? setMsg("Session edited successfully")
-        : setMsg("Session added successfully");
+        ? setToast({
+            open: true,
+            message: "Session edited successfully",
+            type: "success",
+          })
+        : setToast({
+            open: true,
+            message: "Session added successfully",
+            type: "success",
+          });
     } else {
       isEditMode
-        ? setMsg("Failed to edit session")
-        : setMsg("Failed to add session");
+        ? setToast({
+            open: true,
+            message: "Failed to edit session",
+            type: "error",
+          })
+        : setToast({
+            open: true,
+            message: "Failed to add session",
+            type: "error",
+          });
     }
 
     //refresh
     await fetchSessions();
-
-    setShowMsg(true);
-    setTimeout(() => {
-      setShowMsg(false);
-    }, 1000);
 
     //close the form
     setShowForm(false);
@@ -240,9 +264,17 @@ export default function SessionsPage() {
     await response.json();
 
     if (response.ok) {
-      setMsg("Session deleted successfully");
+      setToast({
+        open: true,
+        message: "Session deleted successfully",
+        type: "success",
+      });
     } else {
-      setMsg("Failed to delete session");
+      setToast({
+        open: true,
+        message: "Failed to delete session",
+        type: "success",
+      });
     }
     //refresh
     await fetchSessions();
@@ -496,7 +528,13 @@ export default function SessionsPage() {
               </DialogContent>
             </Dialog>
 
-            {showMsg && <div className="toast-message">{msg}</div>}
+            <ToastMessage
+              open={toast.open}
+              message={toast.message}
+              type={toast.type}
+              onClose={closeToast}
+            />
+
             {showDeleteConfirm && selectedSession && (
               <DeleteConfirm
                 open={showDeleteConfirm}
