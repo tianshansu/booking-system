@@ -222,6 +222,7 @@ export default function SettingsPage() {
             id="outlined-basic"
             label="Current Password"
             variant="outlined"
+            type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
           />
@@ -229,6 +230,7 @@ export default function SettingsPage() {
             id="outlined-basic"
             label="New Password"
             variant="outlined"
+            type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
@@ -236,6 +238,7 @@ export default function SettingsPage() {
             id="outlined-basic"
             label="Confirm Password"
             variant="outlined"
+            type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
