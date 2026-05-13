@@ -1,22 +1,37 @@
 import { useEffect, useState } from "react";
-import "./SettingsPage.css";
 import { apiFetch } from "../../api";
-import OverlayModal from "../../components/common/OverlayModal";
+import PageContainer from "../../components/common/PageContainer";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { Box, Button, Card, Typography } from "@mui/material";
+import TextField from "@mui/material/TextField";
+import ToastMessage from "../../components/common/ToastMessage";
 
 export default function SettingsPage() {
-  const [email, setEmail] = useState([]);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+
+  // update info
+  const [newName, setNewName] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showMsg, setShowMsg] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
 
-  const [showChangePswPanel, setShowChangePswPanel] = useState(false);
+  const closeToast = () => {
+    setToast({
+      ...toast,
+      open: false,
+    });
+  };
 
   // fetch page
-  useEffect(() => {
+  const fetchPage = () => {
     apiFetch("/api/auth/me")
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -24,14 +39,58 @@ export default function SettingsPage() {
       })
       .then((data) => {
         setEmail(data.email);
+        setName(data.name);
+        setNewName(data.name);
       })
       .catch((e) => console.error("fetch failed:", e));
+  };
+  useEffect(() => {
+    fetchPage();
   }, []);
+
+  // change account info
+  const saveChange = async () => {
+    try {
+      const r = await apiFetch("/api/auth/change-info", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newName,
+        }),
+      });
+
+      const data = await r.json();
+
+      if (!r.ok) {
+        throw new Error(data.error || `HTTP ${r.status}`);
+      }
+
+      setToast({
+        open: true,
+        message: "Changes saved",
+        type: "success",
+      });
+
+      fetchPage();
+    } catch (e) {
+      setToast({
+        open: true,
+        message: e.message,
+        type: "error",
+      });
+    }
+  };
 
   const checkPassword = async () => {
     if (newPassword !== confirmPassword) {
-      setMsg("Passwords does not match!");
-      setShowMsg(true);
+      setToast({
+        open: true,
+        message: "Passwords does not match!",
+        type: "error",
+      });
+
       return;
     }
 
@@ -53,92 +112,149 @@ export default function SettingsPage() {
         throw new Error(data.error || `HTTP ${r.status}`);
       }
 
-      setMsg("Password changed successfully!");
-      setShowMsg(true);
+      setToast({
+        open: true,
+        message: "Password changed successfully!",
+        type: "success",
+      });
 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setShowChangePswPanel(false);
     } catch (e) {
-      setMsg(e.message);
-      setShowMsg(true);
+      setToast({
+        open: true,
+        message: e.message,
+        type: "error",
+      });
     }
   };
 
   return (
-    <div className="settings">
-      <div className="settings-group">
-        <div className="settings-group-title">Account Info</div>
-        <div className="settings-group-item">
-          <div className="settings-group-name">Email:</div>
-          <div className="settings-group-value">{email}</div>
-        </div>
-        <div className="settings-group-item">
-          <div className="settings-group-name">Role:</div>
-          <div className="settings-group-value">Admin</div>
-        </div>
-      </div>
+    <PageContainer>
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Card
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: { xs: "100%", sm: 360 },
+            height: { xs: "100%", sm: 120 },
+            px: 3,
+            py: 2,
+            gap: 1,
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            Account Profile
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <AccountCircleIcon sx={{ fontSize: 60, color: "primary.main" }} />
+            <Box>
+              <Typography sx={{ fontWeight: 600 }}>{name}</Typography>
+              <Typography>{email}</Typography>
+            </Box>
+          </Box>
+        </Card>
 
-      <div className="settings-group">
-        <div className="settings-group-title">Security</div>
-        <div className="settings-group-item">
-          <button
-            className="settings-group-name"
-            onClick={() => setShowChangePswPanel(true)}
+        <Card
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: { xs: "100%", sm: 360 },
+            px: 3,
+            py: 2,
+            gap: 1,
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            Account Information
+          </Typography>
+          <Box
+            component="form"
+            sx={{ "& > :not(style)": { m: 1, width: "25ch" } }}
+            noValidate
+            autoComplete="off"
           >
-            Change Password
-          </button>
-          {showChangePswPanel && (
-            <OverlayModal
-              open={showChangePswPanel}
-              title={"Change Password"}
-              onClose={() => setShowChangePswPanel(false)}
-            >
-              <div className="settings-group">
-                <div className="settings-group-item">
-                  <div className="settings-group-name">Current Password:</div>
-                  <input
-                    className="settings-group-input"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                  />
-                </div>
+            <TextField
+              id="outlined-basic"
+              label="Name"
+              variant="outlined"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <TextField
+              id="outlined-basic"
+              label="Email"
+              variant="outlined"
+              value={email}
+              InputProps={{
+                readOnly: true,
+              }}
+            />
+            <Button variant="contained" onClick={saveChange}>
+              Save Changes
+            </Button>
+          </Box>
+        </Card>
+      </Box>
 
-                <div className="settings-group-item">
-                  <div className="settings-group-name">New Password:</div>
-                  <input
-                    className="settings-group-input"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                </div>
+      <Card
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          width: { xs: "100%", sm: 736 },
+          px: 3,
+          py: 2,
+          gap: 1,
+        }}
+      >
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          Change Password
+        </Typography>
 
-                <div className="settings-group-item">
-                  <div className="settings-group-name">Confirm Password:</div>
-                  <input
-                    className="settings-group-input"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
+        <Box
+          component="form"
+          sx={{ display: "flex", gap: 2 }}
+          noValidate
+          autoComplete="off"
+        >
+          <TextField
+            id="outlined-basic"
+            label="Current Password"
+            variant="outlined"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
+          <TextField
+            id="outlined-basic"
+            label="New Password"
+            variant="outlined"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <TextField
+            id="outlined-basic"
+            label="Confirm Password"
+            variant="outlined"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </Box>
+        <Button
+          variant="contained"
+          sx={{ width: { xs: "100%", sm: 200 } }}
+          onClick={() => checkPassword()}
+        >
+          Save Changes
+        </Button>
+      </Card>
 
-                <button
-                  className="settings-submit"
-                  type="submit"
-                  onClick={() => checkPassword()}
-                >
-                  Submit
-                </button>
-              </div>
-            </OverlayModal>
-          )}
-        </div>
-        {showMsg && <div className="toast-message">{msg}</div>}
-      </div>
-    </div>
+      <ToastMessage
+        open={toast.open}
+        message={toast.message}
+        type={toast.type}
+        onClose={closeToast}
+      />
+    </PageContainer>
   );
 }
