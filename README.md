@@ -7,13 +7,15 @@ The system provides an admin workflow for managing patients, staff, appointments
 
 This project simulates a real-world admin booking platform where administrators can manage people records, create and update appointment sessions, track upcoming sessions, and export operational data.
 
+The frontend was initially styled with custom CSS files during the first implementation phase. After the core workflows were completed, I refactored the interface using Material UI (MUI) to create a more consistent, reusable, and professional admin dashboard experience. The redesigned UI uses component-based layouts, cards, dialogs, forms, tables, navigation elements, and feedback components across the system.
+
 It also includes an AI Help Assistant that allows logged-in users to ask questions about how to use the system. The assistant is integrated through a protected backend API and answers based on a project-specific system guide.
 
 The application is deployed with the frontend hosted on Vercel, the backend API hosted on Render, and the PostgreSQL database hosted on Neon.
 
 ## Tech Stack
 
-**Frontend:** React, JavaScript, HTML, CSS  
+**Frontend:** React, JavaScript, HTML, CSS, Material UI (MUI)  
 **Backend:** Node.js, Express.js, REST APIs  
 **Database:** PostgreSQL, Neon  
 **Authentication:** JWT, bcrypt  
@@ -76,9 +78,19 @@ The application is deployed with the frontend hosted on Vercel, the backend API 
   - General system operations
 - Includes chat-style message history, loading state, and error handling
 
+### UI Refactoring and Admin Experience
+
+- Initially implemented the frontend styling with custom CSS files
+- Later refactored the interface using Material UI (MUI) to improve consistency, maintainability, and visual quality
+- Built a structured admin layout with sidebar navigation and header bar
+- Replaced custom UI patterns with reusable MUI cards, dialogs, forms, tables, buttons, and feedback components
+- Created a more unified visual design across dashboard, people, sessions, settings, help, login, and AI assistant pages
+
 ## My Role
 
 - Built React pages for dashboard, people management, session management, and admin workflows
+- Initially built the frontend styling with custom CSS files, then refactored the UI using Material UI (MUI) for a more consistent and reusable admin dashboard design
+- Reworked key interface elements with MUI components, including layout structure, cards, dialogs, tables, form controls, buttons, navigation, and feedback messages
 - Built Express REST APIs for authentication, people, sessions, dashboard data, and AI assistant functionality
 - Designed PostgreSQL data models for users, people, sessions, and activity records
 - Implemented JWT-based login authentication with password hashing
