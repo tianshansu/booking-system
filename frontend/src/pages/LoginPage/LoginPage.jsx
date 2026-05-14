@@ -1,7 +1,11 @@
-import "./LoginPage.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../api";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -43,35 +47,67 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-page">
-      <form className="login-content" onSubmit={handleSubmit}>
-        <div className="login-title">Login</div>
-        <div className="login-content-text">
-          <div className="login-content-text-row">
-            <div className="login-label">Username</div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="username" //remember in browser
-              required
-            />
-          </div>
-          <div className="login-content-text-row">
-            <div className="login-label">Password</div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password" //remember in browser
-              required
-            />
-          </div>
-        </div>
-        <button className="login-button" type="submit">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Card
+        component="form"
+        sx={{
+          width: 420,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          px: 4,
+          py: 4,
+          gap: 2,
+        }}
+        onSubmit={handleSubmit}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.8,
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "primary.main" }}>
+            Booking System
+          </Typography>
+          <Typography variant="body2">Appointment Management Portal</Typography>
+        </Box>
+        <TextField
+          id="outlined-basic"
+          label="Email"
+          variant="outlined"
+          fullWidth
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="username" //remember in browser
+          required
+        />
+        <TextField
+          id="outlined-basic"
+          label="Password"
+          variant="outlined"
+          fullWidth
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password" //remember in browser
+          required
+        />
+
+        <Button variant="contained" fullWidth type="submit">
           Login
-        </button>
-      </form>
-    </div>
+        </Button>
+      </Card>
+    </Box>
   );
 }

@@ -1,5 +1,6 @@
-import { AppBar, Toolbar, Typography, Box } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const TITLE_MAP = {
   "/": "Dashboard",
@@ -21,9 +22,16 @@ const SUBTITLE_MAP = {
 export default function HeaderBar() {
   const location = useLocation();
   const path = location.pathname;
+  const navigate = useNavigate();
 
   const title = TITLE_MAP[path] ?? "Dashboard";
   const subtitle = SUBTITLE_MAP[path] ?? "Welcome back!";
+
+  // logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
   return (
     <AppBar
@@ -50,6 +58,9 @@ export default function HeaderBar() {
             {subtitle}
           </Typography>
         </Box>
+        <Button onClick={handleLogout}>
+          <LogoutIcon />
+        </Button>
       </Toolbar>
     </AppBar>
   );

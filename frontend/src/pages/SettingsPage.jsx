@@ -249,7 +249,7 @@ export default function SettingsPage() {
           sx={{ width: { xs: "100%", sm: 200 } }}
           onClick={() => checkPassword()}
         >
-          Save Changes
+          Update Password
         </Button>
       </Card>
 
