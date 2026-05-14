@@ -1,6 +1,11 @@
 import { useState } from "react";
-import "./AiAssistant.css";
 import { apiFetch } from "../../api";
+import Box from "@mui/material/Box";
+import Fab from "@mui/material/Fab";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 export default function AiAssistant() {
   const [open, setOpen] = useState(false);
@@ -72,27 +77,86 @@ export default function AiAssistant() {
   }
 
   return (
-    <div className="ai-box">
+    <Box sx={{ position: "fixed", right: 24, bottom: 100 }}>
       {open && (
-        <div className="ai-window">
-          <h3>AI Help Assistant</h3>
+        <Card
+          sx={{
+            width: "320px",
+            p: 2,
+            mb: "12px",
+            bgcolor: "white",
+            border: "1px solid #ddd",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
 
-          <div className="ai-messages">
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
+          <Typography variant="h6">AI Help Assistant</Typography>
+
+          <Box
+            sx={{
+              maxHeight: "300px",
+              overflowY: "auto",
+              mb: "12px",
+            }}
+          >
             {messages.map((message, index) => (
-              <div
+              <Box
                 key={index}
-                className={`ai-message ai-message-${message.role}`}
+                sx={{
+                  px: "12px",
+                  py: "10px",
+                  borderRadius: "12px",
+                  mb: "8px",
+                  fontSize: "14px",
+                  lineHeight: 1.5,
+                  whiteSpace: "pre-wrap",
+                  maxWidth: message.role === "user" ? "80%" : "85%",
+
+                  ...(message.role === "user"
+                    ? {
+                        ml: "auto",
+                        bgcolor: "#1f2937",
+                        color: "white",
+                      }
+                    : {
+                        mr: "auto",
+                        bgcolor: "#f3f4f6",
+                        color: "#111827",
+                      }),
+                }}
               >
                 {message.text}
-              </div>
+              </Box>
             ))}
 
             {loading && (
-              <div className="ai-message ai-message-assistant">Thinking...</div>
+              <Box
+                sx={{
+                  px: "12px",
+                  py: "10px",
+                  borderRadius: "12px",
+                  mb: "8px",
+                  fontSize: "14px",
+                  lineHeight: 1.5,
+                  whiteSpace: "pre-wrap",
+                  maxWidth: "85%",
+                  mr: "auto",
+                  bgcolor: "#f3f4f6",
+                  color: "#111827",
+                }}
+              >
+                Thinking...
+              </Box>
             )}
-          </div>
+          </Box>
 
-          <input
+          <TextField
+            fullWidth
+            size="small"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={(e) => {
@@ -103,15 +167,22 @@ export default function AiAssistant() {
             placeholder="Ask a question..."
           />
 
-          <button onClick={askAI} disabled={loading}>
+          <Button variant="contained" onClick={askAI} disabled={loading}>
             {loading ? "Thinking..." : "Ask"}
-          </button>
-        </div>
+          </Button>
+        </Card>
       )}
 
-      <button className="ai-button" onClick={() => setOpen(!open)}>
-        ASK
-      </button>
-    </div>
+      <Box sx={{ "& > :not(style)": { m: 1 } }}>
+        <Fab
+          color="primary"
+          aria-label="add"
+          onClick={() => setOpen(!open)}
+          sx={{ position: "fixed", right: 24, bottom: 24 }}
+        >
+          ASK
+        </Fab>
+      </Box>
+    </Box>
   );
 }

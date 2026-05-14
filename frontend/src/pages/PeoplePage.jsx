@@ -23,6 +23,7 @@ import PublishIcon from "@mui/icons-material/Publish";
 import AddIcon from "@mui/icons-material/Add";
 import ToastMessage from "../components/common/ToastMessage";
 import DeleteConfirm from "../components/common/DeleteConfirm";
+import AiAssistant from "../components/aiAssistant/AiAssistant";
 
 export default function PeoplePage() {
   const [people, setPeople] = useState([]);
@@ -536,6 +537,8 @@ export default function PeoplePage() {
           onEdit={openEditForm}
         ></PeopleTable>
       )}
+
+      <AiAssistant></AiAssistant>
     </PageContainer>
   );
 }

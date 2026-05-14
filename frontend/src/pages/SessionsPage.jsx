@@ -28,6 +28,7 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import DeleteConfirm from "../components/common/DeleteConfirm";
 import ToastMessage from "../components/common/ToastMessage";
+import AiAssistant from "../components/aiAssistant/AiAssistant";
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
@@ -571,6 +572,8 @@ export default function SessionsPage() {
           onDelete={handleOpenDeleteConfirm}
         />
       )}
+
+      <AiAssistant></AiAssistant>
     </PageContainer>
   );
 }

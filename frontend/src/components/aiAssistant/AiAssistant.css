@@ -1,59 +1,9 @@
-.ai-box {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 9999;
-}
-
-.ai-button {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: none;
-  background: #1f2937;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.ai-window {
-  width: 320px;
-  padding: 16px;
-  margin-bottom: 12px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.ai-window h3 {
-  margin-top: 0;
-}
-
-.ai-window input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px;
-  margin-bottom: 8px;
-}
-
-.ai-window button {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
 .ai-answer {
   margin-top: 12px;
   padding: 10px;
   background: #f3f4f6;
   border-radius: 8px;
   white-space: pre-wrap;
-}
-
-.ai-messages {
-  max-height: 300px;
-  overflow-y: auto;
-  margin-bottom: 12px;
 }
 
 .ai-message {

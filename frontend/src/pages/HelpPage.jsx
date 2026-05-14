@@ -10,6 +10,7 @@ import PageContainer from "../components/common/PageContainer";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AiAssistant from "../components/aiAssistant/AiAssistant";
 
 export default function HelpPage() {
   const faqItems = [
@@ -83,6 +84,8 @@ export default function HelpPage() {
           </Box>
         </Card>
       </Box>
+
+      <AiAssistant></AiAssistant>
     </PageContainer>
   );
 }

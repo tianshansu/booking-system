@@ -5,6 +5,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Box, Button, Card, Typography } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import ToastMessage from "../components/common/ToastMessage";
+import AiAssistant from "../components/aiAssistant/AiAssistant";
 
 export default function SettingsPage() {
   const [email, setEmail] = useState("");
@@ -258,6 +259,8 @@ export default function SettingsPage() {
         type={toast.type}
         onClose={closeToast}
       />
+
+      <AiAssistant></AiAssistant>
     </PageContainer>
   );
 }
