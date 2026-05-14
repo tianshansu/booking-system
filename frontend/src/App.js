@@ -1,11 +1,12 @@
 // import logo from './logo.svg';
 import "./App.css";
-import DashboardPage from "./pages/Dashboard/DashboardPage";
-import PeoplePage from "./pages/PeoplePage/PeoplePage";
-import SessionsPage from "./pages/SessionPage/SessionsPage";
+import DashboardPage from "./pages/DashboardPage";
+import PeoplePage from "./pages/PeoplePage";
+import SessionsPage from "./pages/SessionsPage";
 import AppLayout from "./components/layout/AppLayout";
 import LoginPage from "./pages/LoginPage/LoginPage";
-import SettingsPage from "./pages/SettingsPage/SettingsPage";
+import SettingsPage from "./pages/SettingsPage";
+import HelpPage from "./pages/HelpPage";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="people" element={<PeoplePage />} />
         <Route path="sessions" element={<SessionsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="help" element={<HelpPage />} />
       </Route>
     </Routes>
   );

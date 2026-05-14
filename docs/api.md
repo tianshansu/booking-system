@@ -70,7 +70,7 @@ Authorization: Bearer <token>
 
 Purpose:
 
-- Get the current authenticated user's email.
+- Get the current authenticated user's basic information.
 
 Auth:
 
@@ -88,15 +88,84 @@ Response 200:
 
 ```json
 {
-  "email": "user@example.com"
+  "id": 1,
+  "email": "user@example.com",
+  "name": "John Doe"
 }
 ```
 
 Response fields:
 
+id: number
+
 email: string
 
+name: string
+
 Errors:
+
+403: Account disabled
+
+404: User not found
+
+500: Internal server error
+
+## PUT /api/auth/change-info
+
+Purpose:
+
+- Update the current authenticated user's account name.
+
+Auth:
+
+- Required
+
+Query params:
+
+- None
+
+Request body:
+
+```json
+{
+  "name": "John Doe"
+}
+```
+
+Request body fields:
+
+name: string (required)
+
+Response 200:
+
+```
+{
+  "ok": true,
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "name": "John Doe"
+  }
+}
+```
+
+Response fields:
+
+ok: boolean
+
+user: object
+
+user.id: number
+
+user.email: string
+
+user.name: string
+
+Errors:
+
+400: Name is required
+
+404: User not found
 
 500: Internal server error
 
@@ -400,6 +469,77 @@ limit: number
 total: number
 
 totalPages: number
+
+Errors:
+
+400: Invalid role
+
+500: Internal server error
+
+## GET /api/people/all
+
+Purpose:
+
+- Get all people without backend pagination.
+- Support filtering by role and searching by name, email, or phone.
+- Support filtering by person status.
+- Support sorting by person name.
+- Return frontend-friendly people fields.
+- Return each person's last past session date.
+- Designed for frontend pagination such as MUI table pagination.
+
+Auth:
+
+- None
+
+Query params:
+
+- `role`: string, optional, default = `patient`
+- `search`: string, optional, default = `""`
+- `filterStatus`: number, optional, people status filter
+- `filterName`: string, optional, sort by name:
+  - `desc` = descending
+  - any other value or omitted = ascending
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "1234567890",
+      "status": "Active",
+      "lastSession": "2024-01-15",
+      "notes": "not come for sessions for a long time"
+    }
+  ]
+}
+```
+
+Response fields:
+
+data: array
+
+data[].id: number
+
+data[].name: string
+
+data[].email: string | null
+
+data[].phone: string | null
+
+data[].status: "Active" | "Inactive"
+
+data[].lastSession: "YYYY-MM-DD" | null
+
+data[].notes: string | null
 
 Errors:
 
@@ -765,6 +905,89 @@ limit: number
 total: number
 
 totalPages: number
+
+Errors:
+
+500: Internal server error
+
+## GET /api/sessions/all
+
+Purpose:
+
+- Get all sessions with patient/staff names (joined from `people`).
+- Support searching by session name, patient name, or staff name.
+- Support filtering by session status and staff.
+- Support sorting by session start time.
+- Return frontend-friendly session fields.
+- Designed for frontend pagination such as MUI table pagination.
+
+Auth:
+
+- None
+
+Query params:
+
+- `search`: string, optional, default = `""`
+- `status`: number, optional, session status filter
+- `staffId`: number, optional, staff id filter
+- `sortTime`: string, optional, sort by session start time:
+  - `asc` = ascending
+  - any other value or omitted = descending
+
+Request body:
+
+- None
+
+Response 200:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Regular Meet",
+      "patientName": "John Doe",
+      "patientId": 1,
+      "staff": "Dr Smith",
+      "staffId": 2,
+      "status": 0,
+      "date": "2024-01-15",
+      "time": "14:00",
+      "startAt": "2024-01-15T14:00",
+      "endAt": "2024-01-15T15:00",
+      "duration": "60m"
+    }
+  ]
+}
+```
+
+Response fields:
+
+data: array
+
+data[].id: number
+
+data[].name: string
+
+data[].patientName: string
+
+data[].patientId: number
+
+data[].staff: string
+
+data[].staffId: number
+
+data[].status: number
+
+data[].date: "YYYY-MM-DD"
+
+data[].time: "HH:mm"
+
+data[].startAt: "YYYY-MM-DDTHH:mm"
+
+data[].endAt: "YYYY-MM-DDTHH:mm"
+
+data[].duration: string | null
 
 Errors:
 

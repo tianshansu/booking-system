@@ -1,28 +1,55 @@
+import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 import HeadBar from "./HeaderBar";
 import { Outlet } from "react-router-dom";
-import "../../pages/Dashboard/Dashboard.css";
 
-export default function AppLayout(){
-    return(
-        <div className="appShell">  
-            {/* the shell for the whole app */}
-            <aside className="sidebar"> 
-                {/* left column */}
-                <Sidebar></Sidebar> 
-            </aside>
+const drawerWidth = 240;
 
-            <div className="right"> 
-                {/* right column */}
-                <header className="header"> 
-                    {/* a header */}
-                    <HeadBar></HeadBar>
-                </header>
+export default function AppLayout() {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: "background.default",
+      }}
+    >
+      {/* Left sidebar */}
+      <Box
+        component="aside"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+        }}
+      >
+        <Sidebar drawerWidth={drawerWidth} />
+      </Box>
 
-                <main className="content" style={{padding:"30px"}}> 
-                    <Outlet></Outlet>
-                </main>
-            </div>
-        </div>
-    )
+      {/* Right content area */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header */}
+        <Box component="header">
+          <HeadBar />
+        </Box>
+
+        {/* Page content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+          }}
+        >
+          <Outlet />
+        </Box>
+      </Box>
+    </Box>
+  );
 }

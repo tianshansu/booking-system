@@ -1,23 +1,30 @@
+import { Divider, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+
 export default function ListPanel(props) {
-  const styles = {
-    footer: {
-      display: "flex",
-      justifyContent: "center",
-    },
-  };
-
   return (
-    <div style={{ border: "1px solid #E5E7EB", backgroundColor: "white" }}>
-      <header style={{ borderBottom: "1px solid #E5E7EB" }}>
-        <div style={{ padding: "30px 30px 0 30px" }}>
-          <h3 style={{ margin: 0 }}>{props.title}</h3>
-          <p style={{ marginTop: "6px" }}>{props.subtitle}</p>
-        </div>
-      </header>
+    <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
+      <Box sx={{ px: 1, py: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          {props.title}
+        </Typography>
+        <Typography variant="body1">{props.subtitle}</Typography>
+      </Box>
+      <Divider />
 
-      <div>{props.children}</div>
+      <List>{props.children}</List>
 
-      {props.footer && <div style={styles.footer}>{props.footer}</div>}
-    </div>
+      {props.footer && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {props.footer}
+        </Box>
+      )}
+    </Box>
   );
 }
