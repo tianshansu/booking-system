@@ -152,7 +152,7 @@ router.get("/export", async (req, res) => {
   }
 });
 
-// get session
+// get session (backend pagination)
 router.get("/", async (req, res) => {
   try {
     // get current page & limit from query
@@ -285,6 +285,99 @@ router.get("/", async (req, res) => {
     res.json({ data, page, limit, total, totalPages });
   } catch (err) {
     console.error("GET /sessions error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// get all sessions (MUI pagination)
+router.get("/all", async (req, res) => {
+  try {
+    // filter
+    const status = req.query.status;
+    const staffId = req.query.staffId;
+    const sortTime = req.query.sortTime === "asc" ? "ASC" : "DESC";
+
+    // get search
+    const search = req.query.search || "";
+
+    let sql = `
+      SELECT
+        s.id,
+        s.name,
+        s.status,
+        s.start_at,
+        s.end_at,
+        patient.id   AS patient_id,
+        patient.name AS patient_name,
+        staff.id     AS staff_id,
+        staff.name   AS staff_name,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'YYYY-MM-DD') AS session_date,
+        to_char(s.start_at AT TIME ZONE 'Australia/Melbourne', 'HH24:MI')    AS session_time,
+        to_char(
+          s.start_at AT TIME ZONE 'Australia/Melbourne',
+          'YYYY-MM-DD"T"HH24:MI'
+        ) AS start_at_local,
+        to_char(
+          s.end_at AT TIME ZONE 'Australia/Melbourne',
+          'YYYY-MM-DD"T"HH24:MI'
+        ) AS end_at_local
+      FROM sessions s
+      JOIN people patient ON s.patient_id = patient.id
+      JOIN people staff   ON s.staff_id   = staff.id
+      WHERE 1=1
+        AND (
+          s.name ILIKE $1
+          OR patient.name ILIKE $1
+          OR staff.name ILIKE $1
+        )
+    `;
+
+    const values = [];
+    values.push(`%${search}%`);
+    let index = 2;
+
+    //put status into sql
+    if (status !== undefined && status !== "") {
+      sql += ` AND s.status = $${index}`;
+      values.push(Number(status));
+      index++;
+    }
+
+    //put staffId into sql
+    if (staffId !== undefined && staffId !== "") {
+      sql += ` AND s.staff_id = $${index}`;
+      values.push(Number(staffId));
+      index++;
+    }
+
+    // add the remaining sql
+    sql += `
+      ORDER BY s.start_at ${sortTime}
+    `;
+
+    const { rows } = await pool.query(sql, values);
+
+    // Convert DB fields -> frontend-friendly fields
+    const data = rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      patientName: r.patient_name,
+      patientId: r.patient_id,
+      staff: r.staff_name,
+      staffId: r.staff_id,
+      status: r.status,
+      date: r.session_date,
+      time: r.session_time,
+      startAt: r.start_at_local,
+      endAt: r.end_at_local,
+      duration: r.end_at
+        ? `${Math.round((r.end_at - r.start_at) / 60000)}m`
+        : null,
+    }));
+
+    res.json({ data });
+  } catch (err) {
+    console.error("GET /sessions/all error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

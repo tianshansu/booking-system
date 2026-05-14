@@ -206,6 +206,81 @@ router.get("/", async (req, res) => {
   }
 });
 
+// get all people - no pagination version (for MUI)
+router.get("/all", async (req, res) => {
+  try {
+    // get role
+    const role = req.query.role || "patient";
+
+    // get filter values
+    const filterStatus = req.query.filterStatus;
+    const filterName = req.query.filterName === "desc" ? "DESC" : "ASC";
+
+    let roleValue;
+    if (role === "patient") {
+      roleValue = 0;
+    } else if (role === "staff") {
+      roleValue = 1;
+    } else {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // get search
+    const search = req.query.search || "";
+
+    // Get people + last past session date (only sessions before now)
+    let dataSql = `
+      SELECT
+        p.id,
+        p.name,
+        p.email,
+        p.phone,
+        p.status,
+        p.notes,
+        MAX(s.start_at) AS last_session
+      FROM people p
+      LEFT JOIN sessions s
+        ON s.patient_id = p.id
+        AND s.start_at < NOW()
+      WHERE p.role = $1
+        AND (
+          p.name ILIKE $2
+          OR p.email ILIKE $2
+          OR p.phone ILIKE $2
+        )
+    `;
+
+    if (filterStatus !== undefined && filterStatus !== "") {
+      dataSql += ` AND p.status = ${Number(filterStatus)}`;
+    }
+
+    dataSql += `
+      GROUP BY p.id
+      ORDER BY p.name ${filterName}
+    `;
+
+    const { rows } = await pool.query(dataSql, [roleValue, `%${search}%`]);
+
+    // Convert DB fields -> frontend-friendly fields
+    const data = rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      email: r.email,
+      phone: r.phone,
+      status: r.status === 0 ? "Active" : "Inactive",
+      lastSession: r.last_session
+        ? r.last_session.toISOString().slice(0, 10)
+        : null,
+      notes: r.notes,
+    }));
+
+    res.json({ data });
+  } catch (err) {
+    console.error("GET /people error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // get all patient names & ids
 router.get("/patients/options", async (req, res) => {
   try {

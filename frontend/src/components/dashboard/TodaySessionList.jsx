@@ -5,7 +5,7 @@ export default function TodaySessionList({
   onMarkCanceled,
 }) {
   return (
-    <div>
+    <>
       {sessions.map((session) => (
         <RowComponent
           key={session.id}
@@ -14,6 +14,6 @@ export default function TodaySessionList({
           onMarkCanceled={onMarkCanceled}
         />
       ))}
-    </div>
+    </>
   );
 }

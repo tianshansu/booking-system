@@ -16,7 +16,7 @@ router.post("/login", async (req, res) => {
     }
     // Find user by email
     const sql = `
-        SELECT id, email, password_hash, status
+        SELECT id, email, name, password_hash, status
         FROM users
         WHERE email = $1
         LIMIT 1;
@@ -51,7 +51,7 @@ router.post("/login", async (req, res) => {
     return res.json({
       ok: true,
       token,
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, name: user.name },
     });
   } catch (err) {
     console.error("POST /auth/login error:", err);
@@ -59,18 +59,82 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// get current logged-in user
 router.get("/me", authMiddleware, async (req, res) => {
   try {
-    // get user's email
-    const email = req.user.email;
+    const result = await pool.query(
+      `
+      SELECT id, email, name, status
+      FROM users
+      WHERE id = $1
+      LIMIT 1;
+      `,
+      [req.user.id],
+    );
 
-    res.status(200).json({ email });
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.status !== 0) {
+      return res.status(403).json({ error: "Account disabled" });
+    }
+
+    return res.status(200).json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    });
   } catch (err) {
     console.error("GET /auth/me error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// change account info
+router.put("/change-info", authMiddleware, async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    // validate input
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        error: "Name is required",
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET name = $1,
+          updated_at = NOW()
+      WHERE id = $2
+      RETURNING id, email, name;
+      `,
+      [name.trim(), req.user.id],
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      user,
+    });
+  } catch (err) {
+    console.error("PUT /auth/change-info error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// change psw
 router.put("/change-password", authMiddleware, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -118,7 +182,7 @@ router.put("/change-password", authMiddleware, async (req, res) => {
     );
 
     if (!isCurrentPasswordCorrect) {
-      return res.status(401).json({
+      return res.status(400).json({
         error: "Current password is incorrect",
       });
     }

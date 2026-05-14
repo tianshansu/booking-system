@@ -40,6 +40,20 @@ Main features:
 - If filters are applied, the exported file follows the current filtering conditions.
 - The exported CSV includes session name, patient, staff, date, time, and status.
 
+7. Settings
+- Admin users can view their account profile information on the Settings page.
+- The profile section shows the current admin user's name and email address.
+- Users can update their account name and email address.
+- Users can change their password by entering their current password, a new password, and confirming the new password.
+- After making changes, users need to click the Save Changes button to submit the update.
+
+8. Help & Support
+- The Help & Support page provides basic guidance for using the Admin Booking System.
+- Users can find support contact information, including an email address and phone number.
+- The page includes frequently asked questions about common tasks in the system.
+- The FAQ section explains how to add a new patient or staff member, how to create a new session, and whether existing records can be edited or deleted.
+- Users can expand each FAQ item to view its answer.
+
 If the user asks something unrelated to this Admin Booking System, reply:
 "I can only help with questions about this admin booking system."
 `;

@@ -1,26 +1,37 @@
-import "./DeleteConfirm.css";
-export default function DeleteConfirm({ text, onCancel, onConfirm }) {
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
+
+export default function DeleteConfirm({ open, text, onCancel, onConfirm }) {
   return (
-    <div className="delete-confirm-overlay">
-      <div className="delete-confirm">
-        <div className="delete-confirm-title">{text}</div>
-        <div className="delete-confirm-buttons">
-          <button
-            type="button"
-            className="delete-confirm-button"
-            onClick={onCancel}
-          >
-            No
-          </button>
-          <button
-            type="button"
-            className="delete-confirm-button"
-            onClick={onConfirm}
-          >
-            Yes
-          </button>
-        </div>
-      </div>
-    </div>
+    <Dialog
+      open={open}
+      onClose={onCancel}
+      aria-labelledby="delete-confirm-title"
+      aria-describedby="delete-confirm-description"
+    >
+      <DialogTitle id="delete-confirm-title">Confirm Delete</DialogTitle>
+
+      <DialogContent>
+        <DialogContentText id="delete-confirm-description">
+          {text}
+        </DialogContentText>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onCancel} variant="outlined">
+          Cancel
+        </Button>
+
+        <Button onClick={onConfirm} variant="contained" color="error">
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

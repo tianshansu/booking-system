@@ -1,76 +1,191 @@
-import { Link } from "react-router-dom";
-import "./Sidebar.css";
+import {
+  Box,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+} from "@mui/material";
 
-export default function Sidebar() {
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import EventIcon from "@mui/icons-material/Event";
+import SettingsIcon from "@mui/icons-material/Settings";
+import HelpIcon from "@mui/icons-material/Help";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+
+import { NavLink } from "react-router-dom";
+
+const mainNavItems = [
+  {
+    label: "Dashboard",
+    path: "/",
+    icon: <DashboardIcon />,
+  },
+  {
+    label: "People",
+    path: "/people",
+    icon: <PeopleIcon />,
+  },
+  {
+    label: "Sessions",
+    path: "/sessions",
+    icon: <EventIcon />,
+  },
+];
+
+const footerNavItems = [
+  {
+    label: "Settings",
+    path: "/settings",
+    icon: <SettingsIcon />,
+  },
+  {
+    label: "Help",
+    path: "/help",
+    icon: <HelpIcon />,
+  },
+];
+
+export default function Sidebar({ drawerWidth }) {
   return (
-    <nav className="sidebar">
-      <div className="sidebar-title">
-        <img
-          className="sidebar-title-icon"
-          src="/icons/calendar.svg"
-          alt="system logo"
-        ></img>
-        <div className="sidebar-title-text">Booking System</div>
-      </div>
-      <div className="sidebar-links">
-        <div className="sidebar-item">
-          <img
-            className="sidebar-item-icon"
-            src="icons/home-unselected.svg"
-            alt="dashboard-unselected"
-          ></img>
-          {/* click to change the route to / */}
-          <Link to="/" className="sidebar-item-text">
-            Dashboard
-          </Link>
-        </div>
+    <Box
+      component="nav"
+      sx={{
+        width: drawerWidth,
+        height: "100vh",
+        bgcolor: "background.paper",
+        borderRight: "1px solid #E5E7EB",
+        display: "flex",
+        flexDirection: "column",
+        position: "fixed",
+      }}
+    >
+      {/* Sidebar title */}
+      <Box
+        sx={{
+          p: 3,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+        }}
+      >
+        <Box
+          sx={{
+            width: 38,
+            height: 38,
+            borderRadius: 2,
+            bgcolor: "primary.main",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CalendarMonthIcon fontSize="small" />
+        </Box>
 
-        <div className="sidebar-item">
-          <img
-            className="sidebar-item-icon"
-            src="icons/people-unselected.svg"
-            alt="people-unselected"
-          ></img>
-          {/* click to change the route to /people */}
-          <Link to="/people" className="sidebar-item-text">
-            People
-          </Link>
-        </div>
+        <Box>
+          <Typography variant="h6" color="text.primary">
+            Booking System
+          </Typography>
 
-        <div className="sidebar-item">
-          <img
-            className="sidebar-item-icon"
-            src="icons/sessions-unselected.svg"
-            alt="sessions-unselected"
-          ></img>
-          {/* click to change the route to /sessions */}
-          <Link to="/sessions" className="sidebar-item-text">
-            Sessions
-          </Link>
-        </div>
-      </div>
+          <Typography variant="body2" color="text.secondary">
+            Admin Portal
+          </Typography>
+        </Box>
+      </Box>
 
-      <div className="sidebar-footer">
-        <div className="sidebar-item">
-          <img
-            className="sidebar-item-icon"
-            src="icons/setting-unselected.svg"
-            alt="settings-unselected"
-          ></img>
-          {/* click to change the route to /sessions */}
-          <Link to="/settings" className="sidebar-item-text">
-            Settings
-          </Link>
-        </div>
-        <div className="sidebar-item">
-          <img
-            className="sidebar-item-icon"
-            src="icons/help-unselected.svg"
-            alt="help-unselected"
-          ></img>
-          <div className="sidebar-item-text">Help</div>
-        </div>
-      </div>
-    </nav>
+      <Divider />
+
+      {/* Main navigation */}
+      <List sx={{ px: 1.5, py: 2 }}>
+        {mainNavItems.map((item) => (
+          <ListItemButton
+            key={item.path}
+            component={NavLink}
+            to={item.path}
+            end={item.path === "/"}
+            sx={{
+              borderRadius: 2,
+              mb: 0.5,
+              color: "text.secondary",
+
+              "& .MuiListItemIcon-root": {
+                color: "text.secondary",
+              },
+
+              "&.active": {
+                bgcolor: "primary.main",
+                color: "white",
+
+                "& .MuiListItemIcon-root": {
+                  color: "white",
+                },
+              },
+
+              "&:hover": {
+                bgcolor: "primary.light",
+                color: "white",
+
+                "& .MuiListItemIcon-root": {
+                  color: "white",
+                },
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        ))}
+      </List>
+
+      {/* Push footer to bottom */}
+      <Box sx={{ flexGrow: 1 }} />
+
+      <Divider />
+
+      {/* Footer navigation */}
+      <List sx={{ px: 1.5, py: 2 }}>
+        {footerNavItems.map((item) => (
+          <ListItemButton
+            key={item.path}
+            component={NavLink}
+            to={item.path}
+            sx={{
+              borderRadius: 2,
+              mb: 0.5,
+              color: "text.secondary",
+
+              "& .MuiListItemIcon-root": {
+                color: "text.secondary",
+              },
+
+              "&.active": {
+                bgcolor: "primary.main",
+                color: "white",
+
+                "& .MuiListItemIcon-root": {
+                  color: "white",
+                },
+              },
+
+              "&:hover": {
+                bgcolor: "primary.light",
+                color: "white",
+
+                "& .MuiListItemIcon-root": {
+                  color: "white",
+                },
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        ))}
+      </List>
+    </Box>
   );
 }
