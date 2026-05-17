@@ -28,6 +28,7 @@ export default function PeopleTable({ people, onDelete, onEdit }) {
             cursor: "pointer",
             width: "100%",
             color: params.value ? "text.primary" : "text.disabled",
+            fontSize: "14px",
           }}
           onClick={() => {
             setSelectedNote(params.value || "No notes.");
